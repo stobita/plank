@@ -1,0 +1,2 @@
+[mysql]
+  blacklist = ["goose_db_version"]
