@@ -1,0 +1,38 @@
+version: '3.7'
+
+services:
+  api:
+    image: plank_dev
+    build:
+      context: ../../
+      dockerfile: ./deployments/development/api/Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../../:/plank
+    depends_on:
+      - db
+    environment:
+      MYSQL_DBNAME: plank_dev
+      MYSQL_USER: plank_dev
+      MYSQL_PASS: plank_dev
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_SKIPSQLCMD: "true"
+      MYSQL_SSLMODE: "false"
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: plank_dev
+      MYSQL_USER: plank_dev
+      MYSQL_PASSWORD: plank_dev
+      MYSQL_ROOT_PASSWORD: plank_dev
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
+    volumes:
+      - plank_dev_data:/var/lib/mysql
+    ports:
+      - '3306:3306'
+volumes:
+  plank_dev_data:
+    driver: local
+
