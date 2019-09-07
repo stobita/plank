@@ -1,10 +1,10 @@
 import React, { useContext } from "react";
 import styled from "styled-components";
 import { Switch } from "./Switch";
-import { MainContext } from "../Provider";
+import { ViewContext } from "../context/viewContext";
 
 export const Setting = () => {
-  const { themeName, setThemeName } = useContext(MainContext);
+  const { themeName, setThemeName } = useContext(ViewContext);
   const isDarkTheme = themeName === "dark";
   const handleOnClickThemeSwitch = () => {
     setThemeName(prev => (prev === "light" ? "dark" : "light"));
