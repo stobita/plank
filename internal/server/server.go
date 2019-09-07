@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/stobita/plank/internal/controller"
 	"github.com/stobita/plank/internal/infrastructure"
@@ -26,6 +27,11 @@ func Run() error {
 
 func getEngine(controller *controller.Controller) (*gin.Engine, error) {
 	r := gin.Default()
+	r.Use(cors.New(cors.Config{
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders: []string{"Origin", "Content-Length", "Content-Type"},
+		AllowOrigins: []string{"http://localhost:3000"},
+	}))
 	v1 := r.Group("/api/v1")
 	{
 		v1.GET("/boards", controller.GetBoards())
