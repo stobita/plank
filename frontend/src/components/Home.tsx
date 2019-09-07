@@ -2,11 +2,11 @@ import React, { useContext } from "react";
 import styled from "styled-components";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
-import { ModalContext } from "../Provider";
 import { CreateBoardForm } from "./CreateBoardForm";
+import { ViewContext } from "../context/viewContext";
 
 export const Home = () => {
-  const { createBoardActive, setCreateBoardActive } = useContext(ModalContext);
+  const { createBoardActive, setCreateBoardActive } = useContext(ViewContext);
   const handleOnClickModalClose = () => {
     setCreateBoardActive(false);
   };

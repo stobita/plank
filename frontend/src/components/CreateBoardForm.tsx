@@ -4,7 +4,8 @@ import colors from "../colors";
 import boardsRepository, { CreateBoardPayload } from "../api/boardsRepository";
 import { ButtonPair } from "./ButtonPair";
 import { Button } from "./Button";
-import { DataContext } from "../Provider";
+import { CloseButton } from "./CloseButton";
+import { DataContext } from "../context/dataContext";
 
 interface Props {
   onClickClose: () => void;
@@ -32,10 +33,7 @@ export const CreateBoardForm = (props: Props) => {
   return (
     <Wrapper>
       <Head>
-        <CloseButton onClick={props.onClickClose}>
-          <ButtonInner />
-          <ButtonInner />
-        </CloseButton>
+        <CloseButton onClick={props.onClickClose} />
       </Head>
       <Body>
         <Inner>
@@ -68,12 +66,8 @@ export const CreateBoardForm = (props: Props) => {
 };
 
 const Wrapper = styled.div`
-  position: absolute;
+  flex: 1;
   background: ${props => props.theme.bg};
-  height: 100%;
-  width: 100%;
-  top: 0;
-  left: 0;
   display: flex;
   flex-direction: column;
 `;
@@ -112,30 +106,4 @@ const Input = styled.input`
   box-sizing: border-box;
   border-radius: 4px;
   height: 36px;
-`;
-
-const CloseButton = styled.button`
-  border: 1px solid ${props => props.theme.border};
-  height: 36px;
-  width: 36px;
-  border-radius: 18px;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-`;
-
-const ButtonInner = styled.span`
-  position: absolute;
-  width: 50%;
-  height: 2px;
-  background: ${props => props.theme.text};
-  border-radius: 4px;
-  &:nth-of-type(1) {
-    transform: rotate(45deg);
-  }
-  &:nth-of-type(2) {
-    transform: rotate(135deg);
-  }
 `;

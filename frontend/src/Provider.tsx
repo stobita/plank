@@ -4,39 +4,12 @@ import { ThemeProvider } from "styled-components";
 import theme from "./theme";
 import { localStorageRepository } from "./localStorageRepository";
 import { Board } from "./model/model";
+import { DataContext } from "./context/dataContext";
+import { ViewContext } from "./context/viewContext";
 
 interface Props {
   children: ReactNode;
 }
-
-type MainContextType = {
-  themeName: ThemeType;
-  setThemeName: React.Dispatch<React.SetStateAction<ThemeType>>;
-};
-
-export const MainContext = React.createContext<MainContextType>({
-  themeName: "light",
-  setThemeName: () => {}
-});
-
-type DataContextType = {
-  boards: Board[];
-  setBoards: React.Dispatch<React.SetStateAction<Board[]>>;
-};
-export const DataContext = React.createContext<DataContextType>({
-  boards: [],
-  setBoards: () => {}
-});
-
-type ModalContextType = {
-  createBoardActive: boolean;
-  setCreateBoardActive: (b: boolean) => void;
-};
-
-export const ModalContext = React.createContext<ModalContextType>({
-  createBoardActive: false,
-  setCreateBoardActive: () => {}
-});
 
 export default (props: Props) => {
   const currentThemeName = localStorageRepository.getThemeName();
@@ -49,19 +22,19 @@ export default (props: Props) => {
   }, [themeName]);
 
   return (
-    <MainContext.Provider value={{ themeName, setThemeName }}>
-      <ModalContext.Provider
-        value={{
-          createBoardActive,
-          setCreateBoardActive
-        }}
-      >
-        <ThemeProvider theme={theme[themeName]}>
-          <DataContext.Provider value={{ boards, setBoards }}>
-            <div>{props.children}</div>
-          </DataContext.Provider>
-        </ThemeProvider>
-      </ModalContext.Provider>
-    </MainContext.Provider>
+    <ViewContext.Provider
+      value={{
+        themeName,
+        setThemeName,
+        createBoardActive,
+        setCreateBoardActive
+      }}
+    >
+      <ThemeProvider theme={theme[themeName]}>
+        <DataContext.Provider value={{ boards, setBoards }}>
+          <div>{props.children}</div>
+        </DataContext.Provider>
+      </ThemeProvider>
+    </ViewContext.Provider>
   );
 };
