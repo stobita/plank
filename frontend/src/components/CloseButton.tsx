@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { ReactComponent as CloseIconImage } from "../assets/close.svg";
 
 interface Props {
   onClick: () => void;
@@ -8,17 +9,16 @@ interface Props {
 export const CloseButton = (props: Props) => {
   return (
     <Button onClick={props.onClick}>
-      <ButtonInner />
-      <ButtonInner />
+      <CloseIcon />
     </Button>
   );
 };
 
 const Button = styled.button`
-  border: 1px solid ${props => props.theme.border};
-  height: 36px;
-  width: 36px;
-  border-radius: 18px;
+  border: 1px solid ${props => props.theme.solid};
+  height: 32px;
+  width: 32px;
+  border-radius: 16px;
   position: relative;
   display: flex;
   justify-content: center;
@@ -26,16 +26,8 @@ const Button = styled.button`
   cursor: pointer;
 `;
 
-const ButtonInner = styled.span`
-  position: absolute;
-  width: 50%;
-  height: 2px;
-  background: ${props => props.theme.text};
-  border-radius: 4px;
-  &:nth-of-type(1) {
-    transform: rotate(45deg);
-  }
-  &:nth-of-type(2) {
-    transform: rotate(135deg);
-  }
+const CloseIcon = styled(CloseIconImage)`
+  fill: ${props => props.theme.solid};
+  height: 24px;
+  width: 24px;
 `;

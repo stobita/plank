@@ -54,7 +54,7 @@ const Bottom = styled.div`
 `;
 
 const Title = styled.h1`
-  color: ${props => props.theme.text};
+  color: ${props => props.theme.solid};
   margin: 0;
 `;
 
@@ -64,6 +64,6 @@ const Icon = styled.div`
 
 const SettingIcon = styled(SettingIconImage)`
   cursor: pointer;
-  fill: ${props => props.theme.text};
+  fill: ${props => props.theme.solid};
   height: 36px;
 `;

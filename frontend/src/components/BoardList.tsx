@@ -10,7 +10,8 @@ export const BoardList = () => {
   const {
     createBoardActive,
     setCreateBoardActive,
-    setCurrentBoardId
+    setCurrentBoardId,
+    currentBoardId
   } = useContext(ViewContext);
 
   useEffect(() => {
@@ -31,7 +32,11 @@ export const BoardList = () => {
     <Wrapper>
       <List>
         {boards.map(v => (
-          <Item key={v.id} onClick={() => handleOnClickItem(v.id)}>
+          <Item
+            key={v.id}
+            onClick={() => handleOnClickItem(v.id)}
+            selected={currentBoardId === v.id}
+          >
             {v.name}
           </Item>
         ))}
@@ -47,11 +52,14 @@ const List = styled.ul`
   list-style: none;
   padding: 0;
   margin: 0;
-  margin-bottom: 16px;
+  margin-bottom: 32px;
 `;
 
-const Item = styled.li`
+const Item = styled.li<{ selected: boolean }>`
+  font-weight: bold;
+  color: ${props => (props.selected ? props.theme.solid : props.theme.weak)};
   display: flex;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   font-size: 1.1rem;
+  cursor: pointer;
 `;

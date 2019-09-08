@@ -1,9 +1,9 @@
 import styled from "styled-components";
-import colors from "../colors";
 
 export const Textarea = styled.textarea`
   border: 1px solid ${props => props.theme.border};
-  background: ${colors.white};
+  background: ${props => props.theme.bg};
+  color: ${props => props.theme.solid};
   font-size: 16px;
   width: 100%;
   padding: 8px;

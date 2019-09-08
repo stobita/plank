@@ -1,5 +1,6 @@
 import React from "react";
 import styled, { css } from "styled-components";
+import { ReactComponent as PlusIconImage } from "../assets/plus.svg";
 
 interface Props {
   onClick: () => void;
@@ -9,14 +10,13 @@ interface Props {
 export const AddButton = (props: Props) => {
   return (
     <Button onClick={props.onClick}>
-      <ButtonInner isClose={props.isClose} />
-      <ButtonInner isClose={props.isClose} />
+      <PlusIcon isClose={props.isClose} />
     </Button>
   );
 };
 
-const Button = styled.button`
-  border: 1px solid ${props => props.theme.border};
+const Button = styled.div`
+  border: 1px solid ${props => props.theme.solid};
   background: ${props => props.theme.main};
   height: 32px;
   width: 32px;
@@ -25,27 +25,18 @@ const Button = styled.button`
   display: flex;
   justify-content: center;
   align-items: center;
+  box-sizing: border-box;
   cursor: pointer;
 `;
 
-const ButtonInner = styled.span<{ isClose?: boolean }>`
+const PlusIcon = styled(PlusIconImage)<{ isClose?: boolean }>`
+  fill: ${props => props.theme.solid};
   transition: all 0.3s;
-  position: absolute;
-  width: 50%;
-  height: 2px;
-  background: ${props => props.theme.text};
-  border-radius: 4px;
-  &:nth-of-type(1) {
-    transform: rotate(90deg);
-  }
+  height: 24px;
+  width: 24px;
   ${props =>
     props.isClose &&
     css`
-      &:nth-of-type(1) {
-        transform: rotate(135deg);
-      }
-      &:nth-of-type(2) {
-        transform: rotate(45deg);
-      }
+      transform: rotate(45deg);
     `}
 `;

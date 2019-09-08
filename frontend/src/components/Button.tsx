@@ -1,5 +1,4 @@
 import styled, { css } from "styled-components";
-import colors from "../colors";
 
 interface Props {
   primary?: boolean;
@@ -13,20 +12,20 @@ export const Button = styled.button<Props>`
   box-sizing: border-box;
   border-radius: 4px;
   font-weight: bold;
-  color: ${colors.mainGray};
-  border: 1px solid ${colors.mainGray};
+  color: ${props => props.theme.weak};
+  border: 1px solid ${props => props.theme.weak};
   ${props => props.primary && PrimaryStyle}
   ${props => props.danger && DangerStyle};
 `;
 
 const PrimaryStyle = css`
   border: none;
-  background: ${colors.primary};
-  color: ${colors.mainWhite};
+  background: ${props => props.theme.primary};
+  color: ${props => props.theme.primaryInner};
 `;
 
 const DangerStyle = css`
   border: none;
-  background: ${colors.danger};
-  color: ${colors.mainWhite};
+  background: ${props => props.theme.danger};
+  color: ${props => props.theme.dangerInner};
 `;

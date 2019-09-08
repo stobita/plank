@@ -27,7 +27,7 @@ export const CreateSectionForm = () => {
           <NameInput name="name" type="text" onChange={handleOnChangeInput} />
         </Field>
         <Field>
-          <Button>Create</Button>
+          <Button primary>Create</Button>
         </Field>
       </Form>
     </Wrapper>

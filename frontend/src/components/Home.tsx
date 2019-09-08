@@ -56,7 +56,7 @@ export const Home = () => {
 const Wrapper = styled.div`
   display: flex;
   min-height: 100vh;
-  color: ${props => props.theme.text};
+  color: ${props => props.theme.solid};
   background: ${props => props.theme.bg};
 `;
 

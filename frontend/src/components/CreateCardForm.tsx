@@ -46,7 +46,7 @@ export const CreateCardForm = (props: Props) => {
           />
         </Field>
         <Field>
-          <Button>Add</Button>
+          <Button primary>Add</Button>
         </Field>
       </Form>
     </Wrapper>

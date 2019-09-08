@@ -1,6 +1,5 @@
 import React from "react";
 import styled from "styled-components";
-import colors from "../colors";
 import { Transition } from "react-transition-group";
 import { TransitionStatus } from "react-transition-group/Transition";
 
@@ -27,13 +26,13 @@ const Wrapper = styled.div`
   cursor: pointer;
 `;
 const Left = styled.p`
-  background: ${colors.primary};
+  background: ${props => props.theme.primary};
   height: 24px;
   width: 24px;
   margin: 0;
 `;
 const Right = styled.p`
-  background: ${colors.mainGray};
+  background: ${props => props.theme.weak};
   height: 24px;
   width: 24px;
   margin: 0;
