@@ -1,32 +1,14 @@
 import React, { useContext } from "react";
 import styled from "styled-components";
-import { AddButton } from "./AddButton";
 import { ViewContext } from "../context/viewContext";
-import { CreateSectionForm } from "./CreateSectionForm";
+import { SectionController } from "./SectionController";
 
 export const Header = () => {
-  const {
-    setCreateSectionActive,
-    createSectionActive,
-    currentBoardId
-  } = useContext(ViewContext);
-  const handleOnClickAddSectionButton = () => {
-    setCreateSectionActive(true);
-  };
+  const { currentBoardId } = useContext(ViewContext);
   return (
     <Wrapper>
       <CreateSection>
-        {currentBoardId !== 0 && (
-          <>
-            {!createSectionActive && (
-              <>
-                <AddButton onClick={handleOnClickAddSectionButton} />
-                <ButtonLabel>Create Section</ButtonLabel>
-              </>
-            )}
-            {createSectionActive && <CreateSectionForm />}
-          </>
-        )}
+        {currentBoardId !== 0 && <SectionController />}
       </CreateSection>
     </Wrapper>
   );
@@ -43,9 +25,4 @@ const CreateSection = styled.div`
   padding-left: 16px;
   display: flex;
   align-items: center;
-`;
-
-const ButtonLabel = styled.span`
-  font-weight: bold;
-  padding-left: 12px;
 `;

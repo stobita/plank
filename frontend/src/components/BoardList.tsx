@@ -7,7 +7,11 @@ import { ViewContext } from "../context/viewContext";
 
 export const BoardList = () => {
   const { boards, setBoards } = useContext(DataContext);
-  const { setCreateBoardActive, setCurrentBoardId } = useContext(ViewContext);
+  const {
+    createBoardActive,
+    setCreateBoardActive,
+    setCurrentBoardId
+  } = useContext(ViewContext);
 
   useEffect(() => {
     boardsRepository.getBoards().then(items => {
@@ -16,7 +20,7 @@ export const BoardList = () => {
   }, [setBoards]);
 
   const handleOnClickAddButton = () => {
-    setCreateBoardActive(true);
+    setCreateBoardActive(prev => !prev);
   };
 
   const handleOnClickItem = (id: number) => {
@@ -32,7 +36,7 @@ export const BoardList = () => {
           </Item>
         ))}
       </List>
-      <AddButton onClick={handleOnClickAddButton} />
+      <AddButton onClick={handleOnClickAddButton} isClose={createBoardActive} />
     </Wrapper>
   );
 };
