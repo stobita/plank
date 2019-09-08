@@ -21,7 +21,7 @@ export const Header = () => {
             {!createSectionActive && (
               <>
                 <AddButton onClick={handleOnClickAddSectionButton} />
-                <span>Create Section</span>
+                <ButtonLabel>Create Section</ButtonLabel>
               </>
             )}
             {createSectionActive && <CreateSectionForm />}
@@ -33,6 +33,7 @@ export const Header = () => {
 };
 
 const Wrapper = styled.header`
+  background: ${props => props.theme.main};
   height: 56px;
   border-bottom: 1px solid ${props => props.theme.border};
   display: flex;
@@ -42,4 +43,9 @@ const CreateSection = styled.div`
   padding-left: 16px;
   display: flex;
   align-items: center;
+`;
+
+const ButtonLabel = styled.span`
+  font-weight: bold;
+  padding-left: 12px;
 `;

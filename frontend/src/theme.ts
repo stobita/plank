@@ -5,14 +5,16 @@ export type ThemeType = typeof themeNames[number];
 
 const lightTheme = {
   primary: colors.primary,
-  bg: colors.mainWhite,
+  main: colors.mainWhite,
+  bg: colors.thinGray,
   text: colors.mainBlack,
   border: colors.borderGray
 };
 
 const darkTheme = {
   primary: colors.primary,
-  bg: colors.mainBlack,
+  main: colors.mainBlack,
+  bg: colors.mainGray,
   text: colors.mainWhite,
   border: colors.borderGray
 };
