@@ -13,11 +13,8 @@ export const CreateSectionForm = () => {
   const { currentBoardId } = useContext(ViewContext);
   const { setSections } = useContext(DataContext);
   const createSection = async () => {
-    const result = await boardsRepository.createSection(
-      currentBoardId,
-      formValue
-    );
-    const current = await boardsRepository.getBoardSections(result.id);
+    await boardsRepository.createSection(currentBoardId, formValue);
+    const current = await boardsRepository.getBoardSections(currentBoardId);
     setSections(current);
   };
   const { formValue, handleOnChangeInput, handleOnSubmit } = useForm<

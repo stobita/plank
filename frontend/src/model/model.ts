@@ -6,6 +6,7 @@ export type Board = {
 export type Section = {
   id: number;
   name: string;
+  cards: Card[];
 };
 
 export type Card = {

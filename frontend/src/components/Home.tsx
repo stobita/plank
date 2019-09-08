@@ -9,15 +9,25 @@ import { DataContext } from "../context/dataContext";
 import { BoardView } from "./BoardView";
 
 export const Home = () => {
-  const { createBoardActive, setCreateBoardActive } = useContext(ViewContext);
-  const { currentBoardId } = useContext(ViewContext);
-  const { setSections } = useContext(DataContext);
+  const {
+    createBoardActive,
+    setCreateBoardActive,
+    currentBoardId,
+    setCurrentBoardId
+  } = useContext(ViewContext);
+  const { setSections, boards } = useContext(DataContext);
 
   useEffect(() => {
     boardsRepository.getBoardSections(currentBoardId).then(items => {
       setSections(items);
     });
   }, [currentBoardId, setSections]);
+
+  useEffect(() => {
+    if (currentBoardId === 0 && boards.length > 0) {
+      setCurrentBoardId(boards[0].id);
+    }
+  });
 
   const handleOnClickModalClose = () => {
     setCreateBoardActive(false);

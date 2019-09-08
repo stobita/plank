@@ -28,6 +28,7 @@ export const Sidebar = () => {
 };
 
 const Wrapper = styled.div`
+  background: ${props => props.theme.main};
   display: flex;
   flex-direction: column;
   flex: 1;
