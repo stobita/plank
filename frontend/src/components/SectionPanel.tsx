@@ -51,11 +51,13 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   min-width: 360px;
+  box-sizing: border-box;
 `;
 
 const Inner = styled.div`
   background: ${props => props.theme.main};
   padding: 8px;
+  box-sizing: border-box;
   border-radius: 4px;
 `;
 

@@ -7,7 +7,7 @@ export default {
   mainBlack: "#222",
   mainGray: "#666",
   lightGray: "#AAA",
-  thinGray: "#ccc",
+  thinGray: "#CCC",
   paleGray: "#EEE",
   borderGray: "#DDD",
   danger: "#DF0139"
