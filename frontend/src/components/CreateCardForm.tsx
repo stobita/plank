@@ -39,7 +39,11 @@ export const CreateCardForm = (props: Props) => {
           ></Input>
         </Field>
         <Field>
-          <Textarea name="description" placeholder="description" />
+          <Textarea
+            name="description"
+            placeholder="description"
+            onChange={handleOnChangeInput}
+          />
         </Field>
         <Field>
           <Button>Add</Button>

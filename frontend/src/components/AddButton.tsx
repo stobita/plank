@@ -1,15 +1,16 @@
 import React from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 interface Props {
   onClick: () => void;
+  isClose?: boolean;
 }
 
 export const AddButton = (props: Props) => {
   return (
     <Button onClick={props.onClick}>
-      <ButtonInner />
-      <ButtonInner />
+      <ButtonInner isClose={props.isClose} />
+      <ButtonInner isClose={props.isClose} />
     </Button>
   );
 };
@@ -27,7 +28,8 @@ const Button = styled.button`
   cursor: pointer;
 `;
 
-const ButtonInner = styled.span`
+const ButtonInner = styled.span<{ isClose?: boolean }>`
+  transition: all 0.3s;
   position: absolute;
   width: 50%;
   height: 2px;
@@ -36,4 +38,14 @@ const ButtonInner = styled.span`
   &:nth-of-type(1) {
     transform: rotate(90deg);
   }
+  ${props =>
+    props.isClose &&
+    css`
+      &:nth-of-type(1) {
+        transform: rotate(135deg);
+      }
+      &:nth-of-type(2) {
+        transform: rotate(45deg);
+      }
+    `}
 `;

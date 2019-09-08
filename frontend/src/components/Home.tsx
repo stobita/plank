@@ -18,9 +18,11 @@ export const Home = () => {
   const { setSections, boards } = useContext(DataContext);
 
   useEffect(() => {
-    boardsRepository.getBoardSections(currentBoardId).then(items => {
-      setSections(items);
-    });
+    if (currentBoardId !== 0) {
+      boardsRepository.getBoardSections(currentBoardId).then(items => {
+        setSections(items);
+      });
+    }
   }, [currentBoardId, setSections]);
 
   useEffect(() => {
@@ -42,10 +44,10 @@ export const Home = () => {
         <Header />
         <Main>
           <BoardView />
-          {createBoardActive && (
-            <CreateBoardForm onClickClose={handleOnClickModalClose} />
-          )}
         </Main>
+        {createBoardActive && (
+          <CreateBoardForm onClickClose={handleOnClickModalClose} />
+        )}
       </Body>
     </Wrapper>
   );
@@ -67,12 +69,12 @@ const Body = styled.div`
   flex: 5;
   display: flex;
   flex-direction: column;
+  position: relative;
 `;
 
 const Main = styled.div`
   display: flex;
   justify-content: center;
   padding: 16px;
-  position: relative;
   flex: 1;
 `;

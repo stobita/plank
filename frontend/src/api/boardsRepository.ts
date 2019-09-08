@@ -1,5 +1,5 @@
 import repository, { Collection } from "./repository";
-import { Board, Section, Card } from "../model/model";
+import { Board, Section } from "../model/model";
 
 const resource = "/boards";
 const childResouce = {

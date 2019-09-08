@@ -20,24 +20,37 @@ export const SectionPanel = (props: Props) => {
         <Head>
           <HeadRow>
             <Name>{props.section.name}</Name>
-            <AddButton onClick={handleOnClickAddButton}></AddButton>
+            <AddButton
+              onClick={handleOnClickAddButton}
+              isClose={formActive}
+            ></AddButton>
           </HeadRow>
-          {formActive && <CreateCardForm section={props.section} />}
+          <FormArea active={formActive}>
+            <CreateCardForm section={props.section} />
+          </FormArea>
         </Head>
         <Items>
           {props.section.cards !== null &&
-            props.section.cards.map(card => <CardPanel card={card} />)}
+            props.section.cards.map(card => (
+              <CardPanel card={card} key={card.id} />
+            ))}
         </Items>
       </Inner>
     </Wrapper>
   );
 };
 
+const FormArea = styled.div<{ active: boolean }>`
+  transition: 0.5s;
+  max-height: ${props => (props.active ? 200 : 0)}px;
+  overflow: hidden;
+`;
+
 const Wrapper = styled.div`
   padding: 0 8px;
   display: flex;
   flex-direction: column;
-  min-width: 280px;
+  min-width: 360px;
 `;
 
 const Inner = styled.div`

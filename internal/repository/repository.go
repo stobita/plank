@@ -96,6 +96,7 @@ func (r *repository) GetBoardSectionsWithCards(board *model.Board) ([]*model.Sec
 		var cards []*model.Card
 		for _, card := range row.R.Cards {
 			cards = append(cards, &model.Card{
+				ID:          card.ID,
 				Name:        card.Name,
 				Description: card.Description,
 			})
