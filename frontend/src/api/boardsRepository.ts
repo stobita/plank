@@ -1,10 +1,17 @@
 import repository, { Collection } from "./repository";
-import { Board } from "../model/model";
+import { Board, Section } from "../model/model";
 
 const resource = "/boards";
+const childResouce = {
+  sections: "sections"
+};
 
 export type CreateBoardPayload = {
-  title: string;
+  name: string;
+};
+
+export type CreateSectionPayload = {
+  name: string;
 };
 
 export default {
@@ -22,6 +29,30 @@ export default {
   },
   async createBoard(payload: CreateBoardPayload): Promise<Board> {
     const res = await repository.post<Board>(`${resource}`, payload);
+    return res.data;
+  },
+  async getBoardSections(boardId: number): Promise<Section[]> {
+    const res = await repository
+      .get<Collection<Section>>(
+        `${resource}/${boardId}/${childResouce.sections}`
+      )
+      .catch(e => {
+        console.error(e);
+        return null;
+      });
+    if (res === null || !res.data.items) {
+      return [];
+    }
+    return res.data.items;
+  },
+  async createSection(
+    boardId: number,
+    payload: CreateSectionPayload
+  ): Promise<Section> {
+    const res = await repository.post<Section>(
+      `${resource}/${boardId}/${childResouce.sections}`,
+      payload
+    );
     return res.data;
   }
 };

@@ -25,7 +25,7 @@ import (
 // Board is an object representing the database table.
 type Board struct {
 	ID        uint      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Title     string    `boil:"title" json:"title" toml:"title" yaml:"title"`
+	Name      string    `boil:"name" json:"name" toml:"name" yaml:"name"`
 	CreatedAt null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
 	UpdatedAt null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
@@ -35,12 +35,12 @@ type Board struct {
 
 var BoardColumns = struct {
 	ID        string
-	Title     string
+	Name      string
 	CreatedAt string
 	UpdatedAt string
 }{
 	ID:        "id",
-	Title:     "title",
+	Name:      "name",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 }
@@ -97,22 +97,26 @@ func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
 
 var BoardWhere = struct {
 	ID        whereHelperuint
-	Title     whereHelperstring
+	Name      whereHelperstring
 	CreatedAt whereHelpernull_Time
 	UpdatedAt whereHelpernull_Time
 }{
 	ID:        whereHelperuint{field: "`boards`.`id`"},
-	Title:     whereHelperstring{field: "`boards`.`title`"},
+	Name:      whereHelperstring{field: "`boards`.`name`"},
 	CreatedAt: whereHelpernull_Time{field: "`boards`.`created_at`"},
 	UpdatedAt: whereHelpernull_Time{field: "`boards`.`updated_at`"},
 }
 
 // BoardRels is where relationship names are stored.
 var BoardRels = struct {
-}{}
+	Sections string
+}{
+	Sections: "Sections",
+}
 
 // boardR is where relationships are stored.
 type boardR struct {
+	Sections SectionSlice
 }
 
 // NewStruct creates a new relationship struct
@@ -124,8 +128,8 @@ func (*boardR) NewStruct() *boardR {
 type boardL struct{}
 
 var (
-	boardAllColumns            = []string{"id", "title", "created_at", "updated_at"}
-	boardColumnsWithoutDefault = []string{"title"}
+	boardAllColumns            = []string{"id", "name", "created_at", "updated_at"}
+	boardColumnsWithoutDefault = []string{"name"}
 	boardColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	boardPrimaryKeyColumns     = []string{"id"}
 )
@@ -403,6 +407,175 @@ func (q boardQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool
 	}
 
 	return count > 0, nil
+}
+
+// Sections retrieves all the section's Sections with an executor.
+func (o *Board) Sections(mods ...qm.QueryMod) sectionQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("`sections`.`board_id`=?", o.ID),
+	)
+
+	query := Sections(queryMods...)
+	queries.SetFrom(query.Query, "`sections`")
+
+	if len(queries.GetSelect(query.Query)) == 0 {
+		queries.SetSelect(query.Query, []string{"`sections`.*"})
+	}
+
+	return query
+}
+
+// LoadSections allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (boardL) LoadSections(ctx context.Context, e boil.ContextExecutor, singular bool, maybeBoard interface{}, mods queries.Applicator) error {
+	var slice []*Board
+	var object *Board
+
+	if singular {
+		object = maybeBoard.(*Board)
+	} else {
+		slice = *maybeBoard.(*[]*Board)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &boardR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &boardR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(qm.From(`sections`), qm.WhereIn(`sections.board_id in ?`, args...))
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load sections")
+	}
+
+	var resultSlice []*Section
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice sections")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on sections")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for sections")
+	}
+
+	if len(sectionAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.Sections = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &sectionR{}
+			}
+			foreign.R.Board = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.BoardID {
+				local.R.Sections = append(local.R.Sections, foreign)
+				if foreign.R == nil {
+					foreign.R = &sectionR{}
+				}
+				foreign.R.Board = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// AddSections adds the given related objects to the existing relationships
+// of the board, optionally inserting them as new records.
+// Appends related to o.R.Sections.
+// Sets related.R.Board appropriately.
+func (o *Board) AddSections(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Section) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.BoardID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE `sections` SET %s WHERE %s",
+				strmangle.SetParamNames("`", "`", 0, []string{"board_id"}),
+				strmangle.WhereClause("`", "`", 0, sectionPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.DebugMode {
+				fmt.Fprintln(boil.DebugWriter, updateQuery)
+				fmt.Fprintln(boil.DebugWriter, values)
+			}
+
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.BoardID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &boardR{
+			Sections: related,
+		}
+	} else {
+		o.R.Sections = append(o.R.Sections, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &sectionR{
+				Board: o,
+			}
+		} else {
+			rel.R.Board = o
+		}
+	}
+	return nil
 }
 
 // Boards retrieves all the records using an executor.

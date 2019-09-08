@@ -4,7 +4,11 @@
 package rdb
 
 var TableNames = struct {
-	Boards string
+	Boards   string
+	Cards    string
+	Sections string
 }{
-	Boards: "boards",
+	Boards:   "boards",
+	Cards:    "cards",
+	Sections: "sections",
 }

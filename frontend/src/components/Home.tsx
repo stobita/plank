@@ -1,15 +1,28 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import styled from "styled-components";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { CreateBoardForm } from "./CreateBoardForm";
 import { ViewContext } from "../context/viewContext";
+import boardsRepository from "../api/boardsRepository";
+import { DataContext } from "../context/dataContext";
+import { BoardView } from "./BoardView";
 
 export const Home = () => {
   const { createBoardActive, setCreateBoardActive } = useContext(ViewContext);
+  const { currentBoardId } = useContext(ViewContext);
+  const { setSections } = useContext(DataContext);
+
+  useEffect(() => {
+    boardsRepository.getBoardSections(currentBoardId).then(items => {
+      setSections(items);
+    });
+  }, [currentBoardId, setSections]);
+
   const handleOnClickModalClose = () => {
     setCreateBoardActive(false);
   };
+
   return (
     <Wrapper>
       <Side>
@@ -18,6 +31,7 @@ export const Home = () => {
       <Body>
         <Header />
         <Main>
+          <BoardView />
           {createBoardActive && (
             <CreateBoardForm onClickClose={handleOnClickModalClose} />
           )}
