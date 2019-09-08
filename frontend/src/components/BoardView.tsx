@@ -16,4 +16,5 @@ export const BoardView = () => {
 
 const Wrapper = styled.div`
   display: flex;
+  flex: 1;
 `;

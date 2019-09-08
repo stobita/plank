@@ -63,13 +63,10 @@ export const CreateBoardForm = (props: Props) => {
 };
 
 const Wrapper = styled.div`
-  flex: 1;
   background: ${props => props.theme.main};
   display: flex;
   flex-direction: column;
-  position: absolute;
-  width: 100%;
-  height: 100%;
+  height: 100vh;
 `;
 
 const Head = styled.div`

@@ -41,12 +41,16 @@ export const Home = () => {
         <Sidebar />
       </Side>
       <Body>
-        <Header />
+        <Head>
+          <Header />
+        </Head>
         <Main>
           <BoardView />
         </Main>
         {createBoardActive && (
-          <CreateBoardForm onClickClose={handleOnClickModalClose} />
+          <Interrupt>
+            <CreateBoardForm onClickClose={handleOnClickModalClose} />
+          </Interrupt>
         )}
       </Body>
     </Wrapper>
@@ -55,14 +59,17 @@ export const Home = () => {
 
 const Wrapper = styled.div`
   display: flex;
-  min-height: 100vh;
   color: ${props => props.theme.solid};
-  background: ${props => props.theme.bg};
+  min-height: 100vh;
 `;
 
 const Side = styled.div`
   flex: 1;
   display: flex;
+  position: fixed;
+  z-index: 1;
+  height: 100%;
+  min-width: 240px;
 `;
 
 const Body = styled.div`
@@ -70,6 +77,13 @@ const Body = styled.div`
   display: flex;
   flex-direction: column;
   position: relative;
+  margin-left: 240px;
+`;
+
+const Head = styled.div`
+  position: fixed;
+  width: 100%;
+  z-index: 1;
 `;
 
 const Main = styled.div`
@@ -77,4 +91,15 @@ const Main = styled.div`
   justify-content: center;
   padding: 16px;
   flex: 1;
+  background: ${props => props.theme.bg};
+  margin-top: 56px;
+  overflow: auto;
+`;
+
+const Interrupt = styled.div`
+  flex: 1;
+  position: absolute;
+  z-index: 1;
+  height: 100vh;
+  width: calc(100vw - 240px);
 `;
