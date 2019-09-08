@@ -1,11 +1,12 @@
-import React, { useCallback, useState, useContext } from "react";
+import React, { useContext } from "react";
 import styled from "styled-components";
-import colors from "../colors";
 import boardsRepository, { CreateBoardPayload } from "../api/boardsRepository";
 import { ButtonPair } from "./ButtonPair";
 import { Button } from "./Button";
 import { CloseButton } from "./CloseButton";
 import { DataContext } from "../context/dataContext";
+import { useForm } from "../hooks/useForm";
+import { Input } from "./Input";
 
 interface Props {
   onClickClose: () => void;
@@ -13,23 +14,19 @@ interface Props {
 
 export const CreateBoardForm = (props: Props) => {
   const { setBoards } = useContext(DataContext);
-  const [formValue, setFormValue] = useState<CreateBoardPayload>({ title: "" });
-  const handleOnChangeInput = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      e.persist();
-      setFormValue(prev => ({ ...prev, [e.target.name]: e.target.value }));
-    },
-    []
-  );
-  const handleOnSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    createBoard();
-  };
   const createBoard = async () => {
     await boardsRepository.createBoard(formValue);
     const current = await boardsRepository.getBoards();
     setBoards(current);
   };
+  const { formValue, handleOnChangeInput, handleOnSubmit } = useForm<
+    CreateBoardPayload
+  >(
+    {
+      name: ""
+    },
+    createBoard
+  );
   return (
     <Wrapper>
       <Head>
@@ -41,12 +38,12 @@ export const CreateBoardForm = (props: Props) => {
           <form onSubmit={handleOnSubmit}>
             <Field>
               <Input
-                name="title"
+                name="name"
                 type="text"
-                placeholder="title"
+                placeholder="name"
                 onChange={handleOnChangeInput}
-                value={formValue.title}
-              ></Input>
+                value={formValue.name}
+              />
             </Field>
             <Field>
               <ButtonPair
@@ -95,15 +92,4 @@ const Title = styled.h2`
 const Field = styled.div`
   display: flex;
   margin-bottom: 16px;
-`;
-
-const Input = styled.input`
-  border: 1px solid ${props => props.theme.border};
-  background: ${colors.white};
-  font-size: 16px;
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-  border-radius: 4px;
-  height: 36px;
 `;

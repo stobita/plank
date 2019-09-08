@@ -1,12 +1,17 @@
-import { createContext } from "react";
+import { createContext, Dispatch, SetStateAction } from "react";
 import { ThemeType, themeNames } from "../theme";
 
 type ViewContextProps = {
   themeName: ThemeType;
-  setThemeName: React.Dispatch<React.SetStateAction<ThemeType>>;
+  setThemeName: Dispatch<SetStateAction<ThemeType>>;
 
   createBoardActive: boolean;
-  setCreateBoardActive: (b: boolean) => void;
+  setCreateBoardActive: Dispatch<SetStateAction<boolean>>;
+  createSectionActive: boolean;
+  setCreateSectionActive: Dispatch<SetStateAction<boolean>>;
+
+  currentBoardId: number;
+  setCurrentBoardId: Dispatch<SetStateAction<number>>;
 };
 
 const defaultProps = {
@@ -14,7 +19,12 @@ const defaultProps = {
   setThemeName: () => {},
 
   createBoardActive: false,
-  setCreateBoardActive: () => {}
+  setCreateBoardActive: () => {},
+  createSectionActive: false,
+  setCreateSectionActive: () => {},
+
+  currentBoardId: 0,
+  setCurrentBoardId: () => {}
 };
 
 export const ViewContext = createContext<ViewContextProps>(defaultProps);
