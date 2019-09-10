@@ -10,7 +10,7 @@ interface Props {
 export const AddButton = (props: Props) => {
   return (
     <Button onClick={props.onClick}>
-      <PlusIcon isClose={props.isClose} />
+      <PlusIcon close={!!props.isClose ? 1 : 0}></PlusIcon>
     </Button>
   );
 };
@@ -29,13 +29,14 @@ const Button = styled.div`
   cursor: pointer;
 `;
 
-const PlusIcon = styled(PlusIconImage)<{ isClose?: boolean }>`
+// NOTE: https://github.com/styled-components/styled-components/issues/1198
+const PlusIcon = styled(PlusIconImage)<{ close: number }>`
   fill: ${props => props.theme.solid};
   transition: all 0.3s;
   height: 24px;
   width: 24px;
   ${props =>
-    props.isClose &&
+    props.close &&
     css`
       transform: rotate(45deg);
     `}
