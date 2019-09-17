@@ -1,11 +1,13 @@
 package controller
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stobita/plank/internal/event"
 	"github.com/stobita/plank/internal/presenter"
 	"github.com/stobita/plank/internal/usecase"
 )
@@ -149,5 +151,40 @@ func (c *Controller) GetBoardsSections() gin.HandlerFunc {
 			return
 		}
 		ctx.JSON(http.StatusOK, res)
+	}
+}
+
+func (c *Controller) SSESubscribe() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+
+		flusher, ok := ctx.Writer.(http.Flusher)
+
+		if !ok {
+			http.Error(ctx.Writer, "Streaming unsupported!", http.StatusInternalServerError)
+			return
+		}
+
+		ctx.Writer.Header().Set("Content-Type", "text/event-stream")
+		ctx.Writer.Header().Set("Cache-Control", "no-cache")
+		ctx.Writer.Header().Set("Connection", "keep-alive")
+
+		sendChan := make(chan []byte)
+		client := &event.Client{SendChannel: sendChan}
+
+		c.inputPort.AddEventClient(client)
+		defer c.inputPort.RemoveEventClient(client)
+
+		for {
+			select {
+			case msg := <-sendChan:
+				log.Println("receive")
+				fmt.Fprintf(ctx.Writer, "data: %s\n\n", msg)
+				flusher.Flush()
+			case <-ctx.Request.Context().Done():
+				log.Println("request context done")
+				close(sendChan)
+				return
+			}
+		}
 	}
 }

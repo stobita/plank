@@ -84,5 +84,6 @@ func (u *usecase) CreateCard(input CreateCardInput) (*model.Card, error) {
 	if err := u.repository.SaveNewCard(m); err != nil {
 		return nil, err
 	}
+	u.eventBroker.Broadcast([]byte("test event"))
 	return m, nil
 }

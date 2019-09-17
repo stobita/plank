@@ -1,6 +1,7 @@
 import React, { ReactNode } from "react";
 import { ViewContextProvider } from "./components/ViewContextProvider";
 import { DataContextProvider } from "./components/DataContextProvider";
+import { EventContextProvider } from "./components/EventContextProvider";
 
 interface Props {
   children: ReactNode;
@@ -9,7 +10,9 @@ interface Props {
 export default (props: Props) => {
   return (
     <ViewContextProvider>
-      <DataContextProvider>{props.children}</DataContextProvider>
+      <EventContextProvider>
+        <DataContextProvider>{props.children}</DataContextProvider>
+      </EventContextProvider>
     </ViewContextProvider>
   );
 };
