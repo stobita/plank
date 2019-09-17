@@ -12,5 +12,13 @@ export const useForm = <P>(initFormValue: P, submitAction: () => void) => {
     e.preventDefault();
     submitAction();
   };
-  return { formValue, handleOnChangeInput, handleOnSubmit };
+  const initializeFormValue = () => {
+    setFormValue(initFormValue);
+  };
+  return {
+    formValue,
+    handleOnChangeInput,
+    handleOnSubmit,
+    initializeFormValue
+  };
 };

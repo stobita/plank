@@ -21,6 +21,11 @@ type CreateCardInput struct {
 	SectionID   uint
 }
 
+type UpdateCardInput struct {
+	Name        string
+	Description string
+}
+
 func (u *usecase) GetAllBoards() ([]*model.Board, error) {
 	return u.repository.GetAllBoards()
 }
@@ -86,4 +91,23 @@ func (u *usecase) CreateCard(input CreateCardInput) (*model.Card, error) {
 	}
 	u.eventBroker.PushAddCardEvent(section.Board)
 	return m, nil
+}
+
+func (u *usecase) UpdateCard(id int, input UpdateCardInput) (*model.Card, error) {
+	card, err := u.repository.GetCard(uint(id))
+	if err != nil {
+		return nil, err
+	}
+	card.Name = input.Name
+	card.Description = input.Description
+
+	return card, u.repository.SaveCard(card)
+}
+
+func (u *usecase) DeleteCard(id int) error {
+	card, err := u.repository.GetCard(uint(id))
+	if err != nil {
+		return err
+	}
+	return u.repository.DeleteCard(card)
 }

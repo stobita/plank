@@ -188,3 +188,54 @@ func (c *Controller) SSESubscribe() gin.HandlerFunc {
 		}
 	}
 }
+
+func (c *Controller) PutBoardsSectionsCards() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var reqBody putBoardsSectionsCardRequestBody
+		if err := ctx.ShouldBindJSON(&reqBody); err != nil {
+			log.Print(err)
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
+			return
+		}
+		cardID, err := strconv.Atoi(ctx.Param("cardID"))
+		if err != nil {
+			log.Print(err)
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
+			return
+		}
+		input := usecase.UpdateCardInput{
+			Name:        reqBody.Name,
+			Description: reqBody.Description,
+		}
+
+		result, err := c.inputPort.UpdateCard(cardID, input)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+			return
+		}
+
+		res, err := presenter.GetCardResponse(result)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, res)
+	}
+}
+
+func (c *Controller) DeleteBoardsSectionsCards() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		cardID, err := strconv.Atoi(ctx.Param("cardID"))
+		if err != nil {
+			log.Print(err)
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
+			return
+		}
+		if err := c.inputPort.DeleteCard(cardID); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+			return
+		}
+		ctx.JSON(http.StatusNoContent, nil)
+	}
+}

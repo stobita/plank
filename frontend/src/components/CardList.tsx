@@ -1,7 +1,7 @@
 import React from "react";
 import { Card } from "../model/model";
-import { CardPanel } from "../api/CardPanel";
 import styled from "styled-components";
+import { CardPanel } from "./CardPanel";
 
 interface Props {
   items: Card[];
