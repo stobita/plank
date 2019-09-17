@@ -4,14 +4,14 @@ import boardsRepository from "../api/boardsRepository";
 import { AddButton } from "./AddButton";
 import { DataContext } from "../context/dataContext";
 import { ViewContext } from "../context/viewContext";
+import { BoardListItem } from "./BoardListItem";
 
 export const BoardList = () => {
   const { boards, setBoards } = useContext(DataContext);
   const {
     createBoardActive,
     setCreateBoardActive,
-    setCurrentBoardId,
-    currentBoardId
+    setCurrentBoardId
   } = useContext(ViewContext);
 
   useEffect(() => {
@@ -32,13 +32,7 @@ export const BoardList = () => {
     <Wrapper>
       <List>
         {boards.map(v => (
-          <Item
-            key={v.id}
-            onClick={() => handleOnClickItem(v.id)}
-            selected={currentBoardId === v.id}
-          >
-            {v.name}
-          </Item>
+          <BoardListItem key={v.id} item={v}></BoardListItem>
         ))}
       </List>
       <AddButton onClick={handleOnClickAddButton} isClose={createBoardActive} />
@@ -53,13 +47,4 @@ const List = styled.ul`
   padding: 0;
   margin: 0;
   margin-bottom: 32px;
-`;
-
-const Item = styled.li<{ selected: boolean }>`
-  font-weight: bold;
-  color: ${props => (props.selected ? props.theme.solid : props.theme.weak)};
-  display: flex;
-  margin-bottom: 12px;
-  font-size: 1.1rem;
-  cursor: pointer;
 `;

@@ -19,6 +19,20 @@ type cardJSON struct {
 	Description string `json:"description"`
 }
 
+type addCardEvent struct {
+	Type    string `json:"type"`
+	BoardID uint   `json:"boardId"`
+}
+
+const addCardEventType = "addCardEvent"
+
+func GetAddCardEvent(model *model.Board) (addCardEvent, error) {
+	return addCardEvent{
+		Type:    addCardEventType,
+		BoardID: model.ID,
+	}, nil
+}
+
 type listJSON struct {
 	Items []interface{} `json:"items"`
 }

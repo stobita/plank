@@ -17,7 +17,8 @@ type repository interface {
 type eventBroker interface {
 	AddClient(EventClient)
 	RemoveClient(EventClient)
-	Broadcast([]byte)
+
+	PushAddCardEvent(*model.Board) error
 }
 
 type EventClient interface{}

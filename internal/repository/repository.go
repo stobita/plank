@@ -69,7 +69,10 @@ func (r *repository) GetBoardByID(id uint) (*model.Board, error) {
 
 func (r *repository) GetSectionByID(id uint) (*model.Section, error) {
 	ctx := context.Background()
-	row, err := rdb.Sections(rdb.SectionWhere.ID.EQ(id)).One(ctx, r.db)
+	row, err := rdb.Sections(
+		rdb.SectionWhere.ID.EQ(id),
+		qm.Load(rdb.SectionRels.Board),
+	).One(ctx, r.db)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -79,6 +82,9 @@ func (r *repository) GetSectionByID(id uint) (*model.Section, error) {
 	return &model.Section{
 		ID:   row.ID,
 		Name: row.Name,
+		Board: &model.Board{
+			ID: row.R.Board.ID,
+		},
 	}, nil
 }
 
