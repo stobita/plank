@@ -14,6 +14,9 @@ export const SectionPanel = (props: Props) => {
   const handleOnClickAddButton = () => {
     setFormActive(prev => !prev);
   };
+  const handleAfterCreateCard = () => {
+    setFormActive(false);
+  };
   return (
     <Wrapper>
       <Inner>
@@ -26,7 +29,10 @@ export const SectionPanel = (props: Props) => {
             ></AddButton>
           </HeadRow>
           <FormArea active={formActive}>
-            <CreateCardForm section={props.section} />
+            <CreateCardForm
+              section={props.section}
+              afterSubmit={handleAfterCreateCard}
+            />
           </FormArea>
         </Head>
         <CardList items={props.section.cards}></CardList>

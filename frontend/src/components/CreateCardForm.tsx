@@ -14,19 +14,25 @@ import { Textarea } from "./Textarea";
 
 interface Props {
   section: Section;
+  afterSubmit: () => void;
 }
 
 export const CreateCardForm = (props: Props) => {
   const { currentBoardId } = useContext(ViewContext);
   const { setSections } = useContext(DataContext);
   const createCard = async () => {
-    await sectionsRepository.CreateCardForm(props.section.id, formValue);
+    await sectionsRepository.createCard(props.section.id, formValue);
     const current = await boardsRepository.getBoardSections(currentBoardId);
     setSections(current);
+    initializeFormValue();
+    props.afterSubmit();
   };
-  const { formValue, handleOnChangeInput, handleOnSubmit } = useForm<
-    CreateCardPayload
-  >({ name: "", description: "" }, createCard);
+  const {
+    formValue,
+    handleOnChangeInput,
+    handleOnSubmit,
+    initializeFormValue
+  } = useForm<CreateCardPayload>({ name: "", description: "" }, createCard);
   return (
     <Wrapper>
       <Form onSubmit={handleOnSubmit}>
@@ -34,6 +40,7 @@ export const CreateCardForm = (props: Props) => {
           <Input
             onChange={handleOnChangeInput}
             name="name"
+            value={formValue.name}
             type="text"
             placeholder="name"
           ></Input>
@@ -41,6 +48,7 @@ export const CreateCardForm = (props: Props) => {
         <Field>
           <Textarea
             name="description"
+            value={formValue.description}
             placeholder="description"
             onChange={handleOnChangeInput}
           />

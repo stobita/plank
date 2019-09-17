@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Card } from "../model/model";
 import styled from "styled-components";
+import { CardPanelDetail } from "./CardPanelDetail";
 
 interface Props {
   card: Card;
@@ -16,9 +17,7 @@ export const CardPanel = (props: Props) => {
       <Inner onClick={handleOnClick}>
         <Name>{card.name}</Name>
         <Detail expand={expand}>
-          <Description>
-            {card.description !== "" ? card.description : "no description"}
-          </Description>
+          <CardPanelDetail item={card}></CardPanelDetail>
         </Detail>
       </Inner>
     </Wrapper>
@@ -43,12 +42,7 @@ const Name = styled.h4`
 `;
 
 const Detail = styled.div<{ expand: boolean }>`
-  transition: 0.5s;
-  max-height: ${props => (props.expand ? 64 : 0)}px;
+  transition: 1s;
+  max-height: ${props => (props.expand ? 240 : 0)}px;
   overflow: hidden;
-`;
-
-const Description = styled.p`
-  padding-top: 8px;
-  margin: 0;
 `;

@@ -14,9 +14,10 @@ type sectionJSON struct {
 }
 
 type cardJSON struct {
-	ID          uint   `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	ID          uint        `json:"id"`
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	Section     sectionJSON `json:"section"`
 }
 
 type addCardEvent struct {
@@ -71,6 +72,9 @@ func GetSectionsResponse(model []*model.Section) (listJSON, error) {
 				ID:          card.ID,
 				Name:        card.Name,
 				Description: card.Description,
+				Section: sectionJSON{
+					ID: v.ID,
+				},
 			})
 		}
 		json.Items = append(json.Items, &sectionJSON{

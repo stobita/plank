@@ -11,13 +11,32 @@ export type CreateCardPayload = {
   description: string;
 };
 
+export type UpdateCardPayload = CreateCardPayload;
+
 export default {
-  async CreateCardForm(
+  async createCard(
     sectionId: number,
     payload: CreateCardPayload
   ): Promise<Card> {
     const res = await repository.post<Card>(
       `${resource}/${sectionId}/${childResouce.cards}`,
+      payload
+    );
+    return res.data;
+  },
+  async deleteCard(sectionId: number, cardId: number): Promise<void> {
+    await repository.delete(
+      `${resource}/${sectionId}/${childResouce.cards}/${cardId}`
+    );
+    return;
+  },
+  async updateCard(
+    sectionId: number,
+    cardId: number,
+    payload: UpdateCardPayload
+  ): Promise<Card> {
+    const res = await repository.put(
+      `${resource}/${sectionId}/${childResouce.cards}/${cardId}`,
       payload
     );
     return res.data;

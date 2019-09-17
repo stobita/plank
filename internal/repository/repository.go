@@ -149,3 +149,57 @@ func (r *repository) SaveNewCard(m *model.Card) error {
 	m.ID = row.ID
 	return nil
 }
+
+func (r *repository) GetCard(id uint) (*model.Card, error) {
+	ctx := context.Background()
+	row, err := rdb.Cards(
+		rdb.CardWhere.ID.EQ(id),
+		qm.Load(rdb.CardRels.Section),
+	).One(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Card{
+		ID:          row.ID,
+		Name:        row.Name,
+		Description: row.Description,
+		Section: &model.Section{
+			ID: row.R.Section.ID,
+		},
+	}, nil
+}
+
+func (r *repository) SaveCard(m *model.Card) error {
+	ctx := context.Background()
+	row, err := rdb.Cards(
+		rdb.CardWhere.ID.EQ(m.ID),
+	).One(ctx, r.db)
+	if err != nil {
+		return err
+	}
+
+	row.Name = m.Name
+	row.Description = m.Description
+
+	if _, err := row.Update(ctx, r.db, boil.Whitelist(
+		rdb.CardColumns.Name,
+		rdb.CardColumns.Description,
+	)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *repository) DeleteCard(m *model.Card) error {
+	ctx := context.Background()
+	row, err := rdb.Cards(
+		rdb.CardWhere.ID.EQ(m.ID),
+	).One(ctx, r.db)
+	if err != nil {
+		return err
+	}
+	if _, err := row.Delete(ctx, r.db); err != nil {
+		return err
+	}
+	return nil
+}
