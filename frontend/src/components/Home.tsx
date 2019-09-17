@@ -7,6 +7,7 @@ import { ViewContext } from "../context/viewContext";
 import boardsRepository from "../api/boardsRepository";
 import { DataContext } from "../context/dataContext";
 import { BoardView } from "./BoardView";
+import { EventContext } from "../context/eventContext";
 
 export const Home = () => {
   const {
@@ -15,7 +16,22 @@ export const Home = () => {
     currentBoardId,
     setCurrentBoardId
   } = useContext(ViewContext);
+  const { updatedBoardIds, setUpdatedBoardIds } = useContext(EventContext);
   const { setSections, boards } = useContext(DataContext);
+
+  useEffect(() => {
+    if (updatedBoardIds.find(v => v === currentBoardId)) {
+      boardsRepository.getBoardSections(currentBoardId).then(items => {
+        setSections(items);
+      });
+    }
+  }, [updatedBoardIds]);
+
+  useEffect(() => {
+    if (updatedBoardIds.find(v => v === currentBoardId)) {
+      setUpdatedBoardIds(prev => prev.filter(v => v !== currentBoardId));
+    }
+  }, [currentBoardId]);
 
   useEffect(() => {
     if (currentBoardId !== 0) {

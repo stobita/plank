@@ -1,6 +1,11 @@
 package event
 
 import (
+	"encoding/json"
+	"errors"
+
+	"github.com/stobita/plank/internal/model"
+	"github.com/stobita/plank/internal/presenter"
 	"github.com/stobita/plank/internal/usecase"
 )
 
@@ -8,7 +13,8 @@ type Broker interface {
 	Run()
 	AddClient(usecase.EventClient)
 	RemoveClient(usecase.EventClient)
-	Broadcast([]byte)
+	broadcast([]byte)
+	PushAddCardEvent(*model.Board) error
 }
 
 type broker struct {
@@ -54,8 +60,21 @@ func (b *broker) RemoveClient(c usecase.EventClient) {
 	b.RemoveClientChannel <- c.(*Client)
 }
 
-func (b *broker) Broadcast(msg []byte) {
+func (b *broker) broadcast(msg []byte) {
 	for c := range b.clients {
 		c.SendChannel <- msg
 	}
+}
+
+func (b *broker) PushAddCardEvent(m *model.Board) error {
+	if m == nil {
+		return errors.New("Board must be set")
+	}
+	res, err := presenter.GetAddCardEvent(m)
+	if err != nil {
+		return err
+	}
+	json, err := json.Marshal(res)
+	b.broadcast(json)
+	return nil
 }

@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Section } from "../model/model";
 import { AddButton } from "./AddButton";
 import { CreateCardForm } from "./CreateCardForm";
-import { CardPanel } from "../api/CardPanel";
+import { CardList } from "./CardList";
 
 interface Props {
   section: Section;
@@ -29,12 +29,7 @@ export const SectionPanel = (props: Props) => {
             <CreateCardForm section={props.section} />
           </FormArea>
         </Head>
-        <Items>
-          {props.section.cards !== null &&
-            props.section.cards.map(card => (
-              <CardPanel card={card} key={card.id} />
-            ))}
-        </Items>
+        <CardList items={props.section.cards}></CardList>
       </Inner>
     </Wrapper>
   );
@@ -62,11 +57,6 @@ const Inner = styled.div`
 `;
 
 const Head = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const Items = styled.div`
   display: flex;
   flex-direction: column;
 `;
