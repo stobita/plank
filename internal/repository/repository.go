@@ -52,7 +52,7 @@ func (r *repository) SaveNewBoard(m *model.Board) error {
 	return nil
 }
 
-func (r *repository) GetBoardByID(id uint) (*model.Board, error) {
+func (r *repository) GetBoard(id uint) (*model.Board, error) {
 	ctx := context.Background()
 	row, err := rdb.Boards(rdb.BoardWhere.ID.EQ(id)).One(ctx, r.db)
 	if err == sql.ErrNoRows {
@@ -67,7 +67,7 @@ func (r *repository) GetBoardByID(id uint) (*model.Board, error) {
 	}, nil
 }
 
-func (r *repository) GetSectionByID(id uint) (*model.Section, error) {
+func (r *repository) GetSection(id uint) (*model.Section, error) {
 	ctx := context.Background()
 	row, err := rdb.Sections(
 		rdb.SectionWhere.ID.EQ(id),
@@ -93,6 +93,7 @@ func (r *repository) GetBoardSectionsWithCards(board *model.Board) ([]*model.Sec
 	rows, err := rdb.Sections(
 		rdb.SectionWhere.BoardID.EQ(board.ID),
 		qm.Load(rdb.SectionRels.Cards),
+		qm.Load(rdb.SectionRels.Board),
 	).All(ctx, r.db)
 	if err != nil {
 		return nil, errors.Wrap(err, "repository: get All error")
@@ -111,6 +112,9 @@ func (r *repository) GetBoardSectionsWithCards(board *model.Board) ([]*model.Sec
 			ID:    row.ID,
 			Name:  row.Name,
 			Cards: cards,
+			Board: &model.Board{
+				ID: row.R.Board.ID,
+			},
 		})
 	}
 	return sections, nil
@@ -196,6 +200,41 @@ func (r *repository) DeleteCard(m *model.Card) error {
 		rdb.CardWhere.ID.EQ(m.ID),
 	).One(ctx, r.db)
 	if err != nil {
+		return err
+	}
+	if _, err := row.Delete(ctx, r.db); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *repository) SaveSection(m *model.Section) error {
+	ctx := context.Background()
+	row, err := rdb.Sections(
+		rdb.SectionWhere.ID.EQ(m.ID),
+	).One(ctx, r.db)
+	if err != nil {
+		return err
+	}
+	row.Name = m.Name
+	if _, err := row.Update(ctx, r.db, boil.Whitelist(
+		rdb.SectionColumns.Name,
+	)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *repository) DeleteSection(m *model.Section) error {
+	ctx := context.Background()
+	row, err := rdb.Sections(
+		rdb.SectionWhere.ID.EQ(m.ID),
+		qm.Load(rdb.SectionRels.Cards),
+	).One(ctx, r.db)
+	if err != nil {
+		return err
+	}
+	if _, err := row.R.Cards.DeleteAll(ctx, r.db); err != nil {
 		return err
 	}
 	if _, err := row.Delete(ctx, r.db); err != nil {

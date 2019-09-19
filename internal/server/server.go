@@ -41,8 +41,12 @@ func getEngine(controller *controller.Controller) (*gin.Engine, error) {
 		v1.GET("/sse", controller.SSESubscribe())
 		v1.GET("/boards", controller.GetBoards())
 		v1.POST("/boards", controller.PostBoards())
+
 		v1.GET("/boards/:boardID/sections", controller.GetBoardsSections())
 		v1.POST("/boards/:boardID/sections", controller.PostBoardsSections())
+		v1.PUT("/boards/:boardID/sections/:sectionID", controller.PutBoardsSections())
+		v1.DELETE("/boards/:boardID/sections/:sectionID", controller.DeleteBoadsSections())
+
 		v1.POST("/sections/:sectionID/cards", controller.PostBoardsSectionsCards())
 		v1.PUT("/sections/:sectionID/cards/:cardID", controller.PutBoardsSectionsCards())
 		v1.DELETE("/sections/:sectionID/cards/:cardID", controller.DeleteBoardsSectionsCards())

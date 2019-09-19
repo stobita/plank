@@ -37,6 +37,7 @@ const Wrapper = styled.div``;
 
 const Message = styled.p`
   color: ${props => props.theme.danger};
+  margin: 0;
   margin-bottom: 8px;
   font-weight: bold;
 `;

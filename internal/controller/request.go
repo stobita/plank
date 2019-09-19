@@ -14,3 +14,5 @@ type postBoardsSectionsCardRequestBody struct {
 }
 
 type putBoardsSectionsCardRequestBody = postBoardsSectionsCardRequestBody
+
+type putBoardsSectionsRequestBody = postBoardsSectionsRequestBody

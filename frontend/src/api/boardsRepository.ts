@@ -14,6 +14,10 @@ export type CreateSectionPayload = {
   name: string;
 };
 
+export type UpdateSectionPayload = {
+  name: string;
+};
+
 export default {
   async getBoards(): Promise<Board[]> {
     const res = await repository
@@ -54,5 +58,22 @@ export default {
       payload
     );
     return res.data;
+  },
+  async updateSection(
+    boardId: number,
+    sectionId: number,
+    payload: UpdateSectionPayload
+  ): Promise<Section> {
+    const res = await repository.put(
+      `${resource}/${boardId}/${childResouce.sections}/${sectionId}`,
+      payload
+    );
+    return res.data;
+  },
+  async deleteSection(boardId: number, sectionId: number): Promise<void> {
+    await repository.delete(
+      `${resource}/${boardId}/${childResouce.sections}/${sectionId}`
+    );
+    return;
   }
 };

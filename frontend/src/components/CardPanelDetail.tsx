@@ -69,10 +69,12 @@ export const CardPanelDetail = (props: Props) => {
       </Top>
       <Expand expand={deleteConfirmation}>
         {deleteConfirmation && (
-          <DeleteConfirmation
-            onSubmit={handleOnDeleteSubmit}
-            onClickCancel={handleOnClickCancel}
-          ></DeleteConfirmation>
+          <ExpandInner>
+            <DeleteConfirmation
+              onSubmit={handleOnDeleteSubmit}
+              onClickCancel={handleOnClickCancel}
+            ></DeleteConfirmation>
+          </ExpandInner>
         )}
       </Expand>
     </Wrapper>
@@ -91,6 +93,11 @@ const Expand = styled.div<{ expand: boolean }>`
   transition: 0.5s;
   max-height: ${props => (props.expand ? 128 : 0)}px;
   overflow: hidden;
+  box-sizing: border-box;
+`;
+
+const ExpandInner = styled.div`
+  padding-top: 8px;
 `;
 
 const Description = styled.p`

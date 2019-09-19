@@ -15,6 +15,10 @@ type CreateSectionInput struct {
 	BoardID uint
 }
 
+type UpdateSectionInput struct {
+	Name string
+}
+
 type CreateCardInput struct {
 	Name        string
 	Description string
@@ -41,7 +45,7 @@ func (u *usecase) CreateBoard(input CreateBoardInput) (*model.Board, error) {
 }
 
 func (u *usecase) GetBoardSections(boardID uint) ([]*model.Section, error) {
-	board, err := u.repository.GetBoardByID(boardID)
+	board, err := u.repository.GetBoard(boardID)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +60,7 @@ func (u *usecase) GetBoardSections(boardID uint) ([]*model.Section, error) {
 }
 
 func (u *usecase) CreateSection(input CreateSectionInput) (*model.Section, error) {
-	board, err := u.repository.GetBoardByID(input.BoardID)
+	board, err := u.repository.GetBoard(input.BoardID)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +78,7 @@ func (u *usecase) CreateSection(input CreateSectionInput) (*model.Section, error
 }
 
 func (u *usecase) CreateCard(input CreateCardInput) (*model.Card, error) {
-	section, err := u.repository.GetSectionByID(input.SectionID)
+	section, err := u.repository.GetSection(input.SectionID)
 	if err != nil {
 		return nil, err
 	}
@@ -110,4 +114,22 @@ func (u *usecase) DeleteCard(id int) error {
 		return err
 	}
 	return u.repository.DeleteCard(card)
+}
+
+func (u *usecase) UpdateSection(id int, input UpdateSectionInput) (*model.Section, error) {
+	section, err := u.repository.GetSection(uint(id))
+	if err != nil {
+		return nil, err
+	}
+	section.Name = input.Name
+
+	return section, u.repository.SaveSection(section)
+}
+
+func (u *usecase) DeleteSection(id int) error {
+	section, err := u.repository.GetSection(uint(id))
+	if err != nil {
+		return err
+	}
+	return u.repository.DeleteSection(section)
 }
