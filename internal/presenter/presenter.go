@@ -11,6 +11,7 @@ type sectionJSON struct {
 	ID    uint       `json:"id"`
 	Name  string     `json:"name"`
 	Cards []cardJSON `json:"cards"`
+	Board boardJSON  `json:"board"`
 }
 
 type cardJSON struct {
@@ -81,6 +82,9 @@ func GetSectionsResponse(model []*model.Section) (listJSON, error) {
 			ID:    v.ID,
 			Name:  v.Name,
 			Cards: cards,
+			Board: boardJSON{
+				ID: v.Board.ID,
+			},
 		})
 	}
 	return json, nil

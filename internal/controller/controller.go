@@ -239,3 +239,52 @@ func (c *Controller) DeleteBoardsSectionsCards() gin.HandlerFunc {
 		ctx.JSON(http.StatusNoContent, nil)
 	}
 }
+
+func (c *Controller) PutBoardsSections() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var reqBody putBoardsSectionsRequestBody
+		if err := ctx.ShouldBindJSON(&reqBody); err != nil {
+			log.Print(err)
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
+			return
+		}
+		sectionID, err := strconv.Atoi(ctx.Param("sectionID"))
+		if err != nil {
+			log.Print(err)
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
+			return
+		}
+		input := usecase.UpdateSectionInput{
+			Name: reqBody.Name,
+		}
+		result, err := c.inputPort.UpdateSection(sectionID, input)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+			return
+		}
+
+		res, err := presenter.GetSectionResponse(result)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, res)
+	}
+}
+
+func (c *Controller) DeleteBoadsSections() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		sectionID, err := strconv.Atoi(ctx.Param("sectionID"))
+		if err != nil {
+			log.Print(err)
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
+			return
+		}
+		if err := c.inputPort.DeleteSection(sectionID); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+			return
+		}
+		ctx.JSON(http.StatusNoContent, nil)
+	}
+}

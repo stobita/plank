@@ -24,12 +24,6 @@ export default {
     );
     return res.data;
   },
-  async deleteCard(sectionId: number, cardId: number): Promise<void> {
-    await repository.delete(
-      `${resource}/${sectionId}/${childResouce.cards}/${cardId}`
-    );
-    return;
-  },
   async updateCard(
     sectionId: number,
     cardId: number,
@@ -40,5 +34,11 @@ export default {
       payload
     );
     return res.data;
+  },
+  async deleteCard(sectionId: number, cardId: number): Promise<void> {
+    await repository.delete(
+      `${resource}/${sectionId}/${childResouce.cards}/${cardId}`
+    );
+    return;
   }
 };
