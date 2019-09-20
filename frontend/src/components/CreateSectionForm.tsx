@@ -9,22 +9,36 @@ import boardsRepository, {
 import { ViewContext } from "../context/viewContext";
 import { DataContext } from "../context/dataContext";
 
-export const CreateSectionForm = () => {
-  const { currentBoardId } = useContext(ViewContext);
+interface Props {
+  afterSubmit: () => void;
+}
+
+export const CreateSectionForm = (props: Props) => {
+  const { currentBoard } = useContext(ViewContext);
   const { setSections } = useContext(DataContext);
   const createSection = async () => {
-    await boardsRepository.createSection(currentBoardId, formValue);
-    const current = await boardsRepository.getBoardSections(currentBoardId);
+    await boardsRepository.createSection(currentBoard.id, formValue);
+    const current = await boardsRepository.getBoardSections(currentBoard.id);
     setSections(current);
+    props.afterSubmit();
+    initializeFormValue();
   };
-  const { formValue, handleOnChangeInput, handleOnSubmit } = useForm<
-    CreateSectionPayload
-  >({ name: "" }, createSection);
+  const {
+    formValue,
+    handleOnChangeInput,
+    handleOnSubmit,
+    initializeFormValue
+  } = useForm<CreateSectionPayload>({ name: "" }, createSection);
   return (
     <Wrapper>
       <Form onSubmit={handleOnSubmit}>
         <Field>
-          <NameInput name="name" type="text" onChange={handleOnChangeInput} />
+          <NameInput
+            value={formValue.name}
+            name="name"
+            type="text"
+            onChange={handleOnChangeInput}
+          />
         </Field>
         <Field>
           <Button primary>Create</Button>

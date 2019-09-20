@@ -1,5 +1,6 @@
 import { createContext, Dispatch, SetStateAction } from "react";
 import { ThemeType, themeNames } from "../theme";
+import { Board } from "../model/model";
 
 type ViewContextProps = {
   themeName: ThemeType;
@@ -7,11 +8,15 @@ type ViewContextProps = {
 
   createBoardActive: boolean;
   setCreateBoardActive: Dispatch<SetStateAction<boolean>>;
+
+  boardSettingActive: boolean;
+  setBoardSettingActive: Dispatch<SetStateAction<boolean>>;
+
   createSectionActive: boolean;
   setCreateSectionActive: Dispatch<SetStateAction<boolean>>;
 
-  currentBoardId: number;
-  setCurrentBoardId: Dispatch<SetStateAction<number>>;
+  currentBoard: Board;
+  setCurrentBoard: Dispatch<SetStateAction<Board>>;
 };
 
 const defaultProps = {
@@ -20,11 +25,15 @@ const defaultProps = {
 
   createBoardActive: false,
   setCreateBoardActive: () => {},
+
+  boardSettingActive: false,
+  setBoardSettingActive: () => {},
+
   createSectionActive: false,
   setCreateSectionActive: () => {},
 
-  currentBoardId: 0,
-  setCurrentBoardId: () => {}
+  currentBoard: { id: 0, name: "" },
+  setCurrentBoard: () => {}
 };
 
 export const ViewContext = createContext<ViewContextProps>(defaultProps);

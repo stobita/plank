@@ -11,6 +11,9 @@ export const SectionController = () => {
   const handleOnClickAddSectionButton = () => {
     setCreateSectionActive(prev => !prev);
   };
+  const afterCreateSubmit = () => {
+    setCreateSectionActive(false);
+  };
   return (
     <>
       <AddButton
@@ -21,7 +24,7 @@ export const SectionController = () => {
         <ButtonLabel>Create Section</ButtonLabel>
       </LabelArea>
       <FormArea formActive={createSectionActive}>
-        <CreateSectionForm />
+        <CreateSectionForm afterSubmit={afterCreateSubmit} />
       </FormArea>
     </>
   );

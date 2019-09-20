@@ -12,6 +12,9 @@ type InputPort interface {
 	AddEventClient(EventClient)
 	RemoveEventClient(EventClient)
 
+	UpdateBoard(id int, input UpdateBoardInput) (*model.Board, error)
+	DeleteBoard(id int) error
+
 	UpdateCard(id int, input UpdateCardInput) (*model.Card, error)
 	DeleteCard(id int) error
 
@@ -23,6 +26,8 @@ type repository interface {
 	GetAllBoards() ([]*model.Board, error)
 	GetBoard(id uint) (*model.Board, error)
 	SaveNewBoard(*model.Board) error
+	SaveBoard(*model.Board) error
+	DeleteBoard(*model.Board) error
 
 	GetSection(id uint) (*model.Section, error)
 	SaveNewSection(*model.Section) error

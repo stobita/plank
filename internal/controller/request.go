@@ -13,6 +13,8 @@ type postBoardsSectionsCardRequestBody struct {
 	Description string `json:"description"`
 }
 
+type putBoardsRequestBoady = postBoardsRequestBody
+
 type putBoardsSectionsCardRequestBody = postBoardsSectionsCardRequestBody
 
 type putBoardsSectionsRequestBody = postBoardsSectionsRequestBody

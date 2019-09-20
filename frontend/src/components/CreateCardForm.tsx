@@ -18,11 +18,11 @@ interface Props {
 }
 
 export const CreateCardForm = (props: Props) => {
-  const { currentBoardId } = useContext(ViewContext);
+  const { currentBoard } = useContext(ViewContext);
   const { setSections } = useContext(DataContext);
   const createCard = async () => {
     await sectionsRepository.createCard(props.section.id, formValue);
-    const current = await boardsRepository.getBoardSections(currentBoardId);
+    const current = await boardsRepository.getBoardSections(currentBoard.id);
     setSections(current);
     initializeFormValue();
     props.afterSubmit();

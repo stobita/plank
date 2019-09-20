@@ -242,3 +242,49 @@ func (r *repository) DeleteSection(m *model.Section) error {
 	}
 	return nil
 }
+
+func (r *repository) SaveBoard(m *model.Board) error {
+	ctx := context.Background()
+	row, err := rdb.Boards(
+		rdb.BoardWhere.ID.EQ(m.ID),
+	).One(ctx, r.db)
+	if err != nil {
+		return err
+	}
+	row.Name = m.Name
+	if _, err := row.Update(ctx, r.db, boil.Whitelist(
+		rdb.BoardColumns.Name,
+	)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *repository) DeleteBoard(m *model.Board) error {
+	ctx := context.Background()
+	row, err := rdb.Boards(
+		rdb.BoardWhere.ID.EQ(m.ID),
+		qm.Load(
+			qm.Rels(
+				rdb.BoardRels.Sections,
+				rdb.SectionRels.Cards,
+			),
+		),
+	).One(ctx, r.db)
+	if err != nil {
+		return err
+	}
+	for _, v := range row.R.Sections {
+		if _, err := v.R.Cards.DeleteAll(ctx, r.db); err != nil {
+			return err
+		}
+	}
+	if _, err := row.R.Sections.DeleteAll(ctx, r.db); err != nil {
+		return err
+	}
+
+	if _, err := row.Delete(ctx, r.db); err != nil {
+		return err
+	}
+	return nil
+}

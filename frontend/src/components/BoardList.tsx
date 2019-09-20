@@ -8,11 +8,7 @@ import { BoardListItem } from "./BoardListItem";
 
 export const BoardList = () => {
   const { boards, setBoards } = useContext(DataContext);
-  const {
-    createBoardActive,
-    setCreateBoardActive,
-    setCurrentBoardId
-  } = useContext(ViewContext);
+  const { createBoardActive, setCreateBoardActive } = useContext(ViewContext);
 
   useEffect(() => {
     boardsRepository.getBoards().then(items => {
@@ -22,10 +18,6 @@ export const BoardList = () => {
 
   const handleOnClickAddButton = () => {
     setCreateBoardActive(prev => !prev);
-  };
-
-  const handleOnClickItem = (id: number) => {
-    setCurrentBoardId(id);
   };
 
   return (

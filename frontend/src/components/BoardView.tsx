@@ -7,14 +7,21 @@ export const BoardView = () => {
   const { sections } = useContext(DataContext);
   return (
     <Wrapper>
-      {sections.map(v => (
-        <SectionPanel section={v} key={v.id} />
-      ))}
+      <Main>
+        {sections.map(v => (
+          <SectionPanel section={v} key={v.id} />
+        ))}
+      </Main>
     </Wrapper>
   );
 };
 
 const Wrapper = styled.div`
   display: flex;
+  flex-direction: column;
   flex: 1;
+`;
+
+const Main = styled.div`
+  display: flex;
 `;

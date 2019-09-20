@@ -4,11 +4,11 @@ import { ViewContext } from "../context/viewContext";
 import { SectionController } from "./SectionController";
 
 export const Header = () => {
-  const { currentBoardId } = useContext(ViewContext);
+  const { currentBoard } = useContext(ViewContext);
   return (
     <Wrapper>
       <CreateSection>
-        {currentBoardId !== 0 && <SectionController />}
+        {currentBoard.id !== 0 && <SectionController />}
       </CreateSection>
     </Wrapper>
   );
