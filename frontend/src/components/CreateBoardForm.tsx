@@ -7,21 +7,29 @@ import { CloseButton } from "./CloseButton";
 import { DataContext } from "../context/dataContext";
 import { useForm } from "../hooks/useForm";
 import { Input } from "./Input";
+import { ViewContext } from "../context/viewContext";
 
 interface Props {
-  onClickClose: () => void;
+  onClickCancel: () => void;
 }
 
 export const CreateBoardForm = (props: Props) => {
   const { setBoards } = useContext(DataContext);
+  const { setCreateBoardActive, setCurrentBoard } = useContext(ViewContext);
   const createBoard = async () => {
-    await boardsRepository.createBoard(formValue);
+    const res = await boardsRepository.createBoard(formValue);
     const current = await boardsRepository.getBoards();
+    initializeFormValue();
+    setCreateBoardActive(false);
     setBoards(current);
+    setCurrentBoard(res);
   };
-  const { formValue, handleOnChangeInput, handleOnSubmit } = useForm<
-    CreateBoardPayload
-  >(
+  const {
+    formValue,
+    handleOnChangeInput,
+    handleOnSubmit,
+    initializeFormValue
+  } = useForm<CreateBoardPayload>(
     {
       name: ""
     },
@@ -29,60 +37,38 @@ export const CreateBoardForm = (props: Props) => {
   );
   return (
     <Wrapper>
-      <Head>
-        <CloseButton onClick={props.onClickClose} />
-      </Head>
-      <Body>
-        <Inner>
-          <Title>Create Board</Title>
-          <form onSubmit={handleOnSubmit}>
-            <Field>
-              <Input
-                name="name"
-                type="text"
-                placeholder="name"
-                onChange={handleOnChangeInput}
-                value={formValue.name}
-              />
-            </Field>
-            <Field>
-              <ButtonPair
-                left={
-                  <Button type="submit" primary>
-                    Create
-                  </Button>
-                }
-                right={<Button onClick={props.onClickClose}>Cancel</Button>}
-              />
-            </Field>
-          </form>
-        </Inner>
-      </Body>
+      <Title>Create Board</Title>
+      <form onSubmit={handleOnSubmit}>
+        <Field>
+          <Input
+            name="name"
+            type="text"
+            placeholder="name"
+            onChange={handleOnChangeInput}
+            value={formValue.name}
+          />
+        </Field>
+        <Field>
+          <ButtonPair
+            left={
+              <Button type="submit" primary>
+                Create
+              </Button>
+            }
+            right={<Button onClick={props.onClickCancel}>Cancel</Button>}
+          />
+        </Field>
+      </form>
     </Wrapper>
   );
 };
 
 const Wrapper = styled.div`
-  background: ${props => props.theme.main};
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-`;
-
-const Head = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  padding: 16px;
-`;
-
-const Body = styled.div`
+  flex: 1;
   display: flex;
   justify-content: center;
-`;
-
-const Inner = styled.div`
-  width: 40%;
-  padding-top: 128px;
+  flex-direction: column;
+  margin-bottom: 128px;
 `;
 
 const Title = styled.h2`

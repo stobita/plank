@@ -19,12 +19,12 @@ interface Props {
   afterSubmit: () => void;
 }
 export const EditCardForm = (props: Props) => {
-  const { currentBoardId } = useContext(ViewContext);
+  const { currentBoard } = useContext(ViewContext);
   const { setSections } = useContext(DataContext);
   const { item } = props;
   const updateCard = async () => {
     await sectionsRepository.updateCard(item.section.id, item.id, formValue);
-    const current = await boardsRepository.getBoardSections(currentBoardId);
+    const current = await boardsRepository.getBoardSections(currentBoard.id);
     setSections(current);
     props.afterSubmit();
   };

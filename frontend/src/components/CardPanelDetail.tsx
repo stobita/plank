@@ -16,7 +16,7 @@ interface Props {
 
 export const CardPanelDetail = (props: Props) => {
   const { item } = props;
-  const { currentBoardId } = useContext(ViewContext);
+  const { currentBoard } = useContext(ViewContext);
   const { setSections } = useContext(DataContext);
   const [deleteConfirmation, setDeleteConfirmation] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -38,7 +38,7 @@ export const CardPanelDetail = (props: Props) => {
 
   const handleOnDeleteSubmit = async () => {
     await sectionsRepository.deleteCard(item.section.id, item.id);
-    const current = await boardsRepository.getBoardSections(currentBoardId);
+    const current = await boardsRepository.getBoardSections(currentBoard.id);
     setSections(current);
   };
 

@@ -8,47 +8,52 @@ import boardsRepository from "../api/boardsRepository";
 import { DataContext } from "../context/dataContext";
 import { BoardView } from "./BoardView";
 import { EventContext } from "../context/eventContext";
+import { BoardSetting } from "./BoardSetting";
+import { HomeInterrupt } from "./HomeInterrupt";
 
 export const Home = () => {
   const {
     createBoardActive,
     setCreateBoardActive,
-    currentBoardId,
-    setCurrentBoardId
+    setBoardSettingActive,
+    currentBoard,
+    setCurrentBoard,
+    boardSettingActive
   } = useContext(ViewContext);
   const { updatedBoardIds, setUpdatedBoardIds } = useContext(EventContext);
   const { setSections, boards } = useContext(DataContext);
 
   useEffect(() => {
-    if (updatedBoardIds.find(v => v === currentBoardId)) {
-      boardsRepository.getBoardSections(currentBoardId).then(items => {
+    if (updatedBoardIds.find(v => v === currentBoard.id)) {
+      boardsRepository.getBoardSections(currentBoard.id).then(items => {
         setSections(items);
       });
     }
   }, [updatedBoardIds]);
 
   useEffect(() => {
-    if (updatedBoardIds.find(v => v === currentBoardId)) {
-      setUpdatedBoardIds(prev => prev.filter(v => v !== currentBoardId));
+    if (updatedBoardIds.find(v => v === currentBoard.id)) {
+      setUpdatedBoardIds(prev => prev.filter(v => v !== currentBoard.id));
     }
-  }, [currentBoardId]);
+  }, [currentBoard.id]);
 
   useEffect(() => {
-    if (currentBoardId !== 0) {
-      boardsRepository.getBoardSections(currentBoardId).then(items => {
+    if (currentBoard.id !== 0) {
+      boardsRepository.getBoardSections(currentBoard.id).then(items => {
         setSections(items);
       });
     }
-  }, [currentBoardId, setSections]);
+  }, [currentBoard.id, setSections]);
 
   useEffect(() => {
-    if (currentBoardId === 0 && boards.length > 0) {
-      setCurrentBoardId(boards[0].id);
+    if (currentBoard.id === 0 && boards.length > 0) {
+      setCurrentBoard(boards[0]);
     }
   });
 
-  const handleOnClickModalClose = () => {
+  const handleOnClickInterruptClose = () => {
     setCreateBoardActive(false);
+    setBoardSettingActive(false);
   };
 
   return (
@@ -64,9 +69,14 @@ export const Home = () => {
           <BoardView />
         </Main>
         {createBoardActive && (
-          <Interrupt>
-            <CreateBoardForm onClickClose={handleOnClickModalClose} />
-          </Interrupt>
+          <HomeInterrupt onClickClose={handleOnClickInterruptClose}>
+            <CreateBoardForm onClickCancel={handleOnClickInterruptClose} />
+          </HomeInterrupt>
+        )}
+        {boardSettingActive && (
+          <HomeInterrupt onClickClose={handleOnClickInterruptClose}>
+            <BoardSetting></BoardSetting>
+          </HomeInterrupt>
         )}
       </Body>
     </Wrapper>
@@ -110,12 +120,4 @@ const Main = styled.div`
   background: ${props => props.theme.bg};
   margin-top: 56px;
   overflow: auto;
-`;
-
-const Interrupt = styled.div`
-  flex: 1;
-  position: absolute;
-  z-index: 1;
-  height: 100vh;
-  width: calc(100vw - 240px);
 `;
