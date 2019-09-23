@@ -292,23 +292,32 @@ func (r *repository) SaveSection(m *model.Section) error {
 
 func (r *repository) DeleteSection(m *model.Section) error {
 	ctx := context.Background()
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
 	row, err := rdb.Sections(
 		rdb.SectionWhere.ID.EQ(m.ID),
 		qm.Load(rdb.SectionRels.Cards),
 		qm.Load(rdb.SectionRels.SectionsCardsPositions),
-	).One(ctx, r.db)
+	).One(ctx, tx)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
-	if _, err := row.R.SectionsCardsPositions.DeleteAll(ctx, r.db); err != nil {
+	if _, err := row.R.SectionsCardsPositions.DeleteAll(ctx, tx); err != nil {
+		tx.Rollback()
 		return err
 	}
-	if _, err := row.R.Cards.DeleteAll(ctx, r.db); err != nil {
+	if _, err := row.R.Cards.DeleteAll(ctx, tx); err != nil {
+		tx.Rollback()
 		return err
 	}
-	if _, err := row.Delete(ctx, r.db); err != nil {
+	if _, err := row.Delete(ctx, tx); err != nil {
+		tx.Rollback()
 		return err
 	}
+	tx.Commit()
 	return nil
 }
 
@@ -331,6 +340,10 @@ func (r *repository) SaveBoard(m *model.Board) error {
 
 func (r *repository) DeleteBoard(m *model.Board) error {
 	ctx := context.Background()
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
 	row, err := rdb.Boards(
 		rdb.BoardWhere.ID.EQ(m.ID),
 		qm.Load(
@@ -345,24 +358,30 @@ func (r *repository) DeleteBoard(m *model.Board) error {
 				rdb.SectionRels.SectionsCardsPositions,
 			),
 		),
-	).One(ctx, r.db)
+	).One(ctx, tx)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 	for _, v := range row.R.Sections {
-		if _, err := v.R.SectionsCardsPositions.DeleteAll(ctx, r.db); err != nil {
+		if _, err := v.R.SectionsCardsPositions.DeleteAll(ctx, tx); err != nil {
+			tx.Rollback()
 			return err
 		}
-		if _, err := v.R.Cards.DeleteAll(ctx, r.db); err != nil {
+		if _, err := v.R.Cards.DeleteAll(ctx, tx); err != nil {
+			tx.Rollback()
 			return err
 		}
 	}
-	if _, err := row.R.Sections.DeleteAll(ctx, r.db); err != nil {
+	if _, err := row.R.Sections.DeleteAll(ctx, tx); err != nil {
+		tx.Rollback()
 		return err
 	}
 
-	if _, err := row.Delete(ctx, r.db); err != nil {
+	if _, err := row.Delete(ctx, tx); err != nil {
+		tx.Rollback()
 		return err
 	}
+	tx.Commit()
 	return nil
 }
