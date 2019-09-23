@@ -66,17 +66,20 @@ var SectionWhere = struct {
 
 // SectionRels is where relationship names are stored.
 var SectionRels = struct {
-	Board string
-	Cards string
+	Board                  string
+	Cards                  string
+	SectionsCardsPositions string
 }{
-	Board: "Board",
-	Cards: "Cards",
+	Board:                  "Board",
+	Cards:                  "Cards",
+	SectionsCardsPositions: "SectionsCardsPositions",
 }
 
 // sectionR is where relationships are stored.
 type sectionR struct {
-	Board *Board
-	Cards CardSlice
+	Board                  *Board
+	Cards                  CardSlice
+	SectionsCardsPositions SectionsCardsPositionSlice
 }
 
 // NewStruct creates a new relationship struct
@@ -404,6 +407,27 @@ func (o *Section) Cards(mods ...qm.QueryMod) cardQuery {
 	return query
 }
 
+// SectionsCardsPositions retrieves all the sections_cards_position's SectionsCardsPositions with an executor.
+func (o *Section) SectionsCardsPositions(mods ...qm.QueryMod) sectionsCardsPositionQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("`sections_cards_positions`.`section_id`=?", o.ID),
+	)
+
+	query := SectionsCardsPositions(queryMods...)
+	queries.SetFrom(query.Query, "`sections_cards_positions`")
+
+	if len(queries.GetSelect(query.Query)) == 0 {
+		queries.SetSelect(query.Query, []string{"`sections_cards_positions`.*"})
+	}
+
+	return query
+}
+
 // LoadBoard allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
 func (sectionL) LoadBoard(ctx context.Context, e boil.ContextExecutor, singular bool, maybeSection interface{}, mods queries.Applicator) error {
@@ -600,6 +624,101 @@ func (sectionL) LoadCards(ctx context.Context, e boil.ContextExecutor, singular 
 	return nil
 }
 
+// LoadSectionsCardsPositions allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-M or N-M relationship.
+func (sectionL) LoadSectionsCardsPositions(ctx context.Context, e boil.ContextExecutor, singular bool, maybeSection interface{}, mods queries.Applicator) error {
+	var slice []*Section
+	var object *Section
+
+	if singular {
+		object = maybeSection.(*Section)
+	} else {
+		slice = *maybeSection.(*[]*Section)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &sectionR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &sectionR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(qm.From(`sections_cards_positions`), qm.WhereIn(`sections_cards_positions.section_id in ?`, args...))
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load sections_cards_positions")
+	}
+
+	var resultSlice []*SectionsCardsPosition
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice sections_cards_positions")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results in eager load on sections_cards_positions")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for sections_cards_positions")
+	}
+
+	if len(sectionsCardsPositionAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.SectionsCardsPositions = resultSlice
+		for _, foreign := range resultSlice {
+			if foreign.R == nil {
+				foreign.R = &sectionsCardsPositionR{}
+			}
+			foreign.R.Section = object
+		}
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.SectionID {
+				local.R.SectionsCardsPositions = append(local.R.SectionsCardsPositions, foreign)
+				if foreign.R == nil {
+					foreign.R = &sectionsCardsPositionR{}
+				}
+				foreign.R.Section = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
 // SetBoard of the section to the related item.
 // Sets o.R.Board to related.
 // Adds o to related.R.Sections.
@@ -691,6 +810,59 @@ func (o *Section) AddCards(ctx context.Context, exec boil.ContextExecutor, inser
 	for _, rel := range related {
 		if rel.R == nil {
 			rel.R = &cardR{
+				Section: o,
+			}
+		} else {
+			rel.R.Section = o
+		}
+	}
+	return nil
+}
+
+// AddSectionsCardsPositions adds the given related objects to the existing relationships
+// of the section, optionally inserting them as new records.
+// Appends related to o.R.SectionsCardsPositions.
+// Sets related.R.Section appropriately.
+func (o *Section) AddSectionsCardsPositions(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*SectionsCardsPosition) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.SectionID = o.ID
+			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE `sections_cards_positions` SET %s WHERE %s",
+				strmangle.SetParamNames("`", "`", 0, []string{"section_id"}),
+				strmangle.WhereClause("`", "`", 0, sectionsCardsPositionPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.DebugMode {
+				fmt.Fprintln(boil.DebugWriter, updateQuery)
+				fmt.Fprintln(boil.DebugWriter, values)
+			}
+
+			if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.SectionID = o.ID
+		}
+	}
+
+	if o.R == nil {
+		o.R = &sectionR{
+			SectionsCardsPositions: related,
+		}
+	} else {
+		o.R.SectionsCardsPositions = append(o.R.SectionsCardsPositions, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &sectionsCardsPositionR{
 				Section: o,
 			}
 		} else {

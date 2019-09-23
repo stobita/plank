@@ -71,14 +71,17 @@ var CardWhere = struct {
 
 // CardRels is where relationship names are stored.
 var CardRels = struct {
-	Section string
+	Section               string
+	SectionsCardsPosition string
 }{
-	Section: "Section",
+	Section:               "Section",
+	SectionsCardsPosition: "SectionsCardsPosition",
 }
 
 // cardR is where relationships are stored.
 type cardR struct {
-	Section *Section
+	Section               *Section
+	SectionsCardsPosition *SectionsCardsPosition
 }
 
 // NewStruct creates a new relationship struct
@@ -385,6 +388,20 @@ func (o *Card) Section(mods ...qm.QueryMod) sectionQuery {
 	return query
 }
 
+// SectionsCardsPosition pointed to by the foreign key.
+func (o *Card) SectionsCardsPosition(mods ...qm.QueryMod) sectionsCardsPositionQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("`card_id` = ?", o.ID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	query := SectionsCardsPositions(queryMods...)
+	queries.SetFrom(query.Query, "`sections_cards_positions`")
+
+	return query
+}
+
 // LoadSection allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
 func (cardL) LoadSection(ctx context.Context, e boil.ContextExecutor, singular bool, maybeCard interface{}, mods queries.Applicator) error {
@@ -486,6 +503,104 @@ func (cardL) LoadSection(ctx context.Context, e boil.ContextExecutor, singular b
 	return nil
 }
 
+// LoadSectionsCardsPosition allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-1 relationship.
+func (cardL) LoadSectionsCardsPosition(ctx context.Context, e boil.ContextExecutor, singular bool, maybeCard interface{}, mods queries.Applicator) error {
+	var slice []*Card
+	var object *Card
+
+	if singular {
+		object = maybeCard.(*Card)
+	} else {
+		slice = *maybeCard.(*[]*Card)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &cardR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &cardR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(qm.From(`sections_cards_positions`), qm.WhereIn(`sections_cards_positions.card_id in ?`, args...))
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load SectionsCardsPosition")
+	}
+
+	var resultSlice []*SectionsCardsPosition
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice SectionsCardsPosition")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for sections_cards_positions")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for sections_cards_positions")
+	}
+
+	if len(cardAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.SectionsCardsPosition = foreign
+		if foreign.R == nil {
+			foreign.R = &sectionsCardsPositionR{}
+		}
+		foreign.R.Card = object
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.ID == foreign.CardID {
+				local.R.SectionsCardsPosition = foreign
+				if foreign.R == nil {
+					foreign.R = &sectionsCardsPositionR{}
+				}
+				foreign.R.Card = local
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
 // SetSection of the card to the related item.
 // Sets o.R.Section to related.
 // Adds o to related.R.Cards.
@@ -530,6 +645,57 @@ func (o *Card) SetSection(ctx context.Context, exec boil.ContextExecutor, insert
 		related.R.Cards = append(related.R.Cards, o)
 	}
 
+	return nil
+}
+
+// SetSectionsCardsPosition of the card to the related item.
+// Sets o.R.SectionsCardsPosition to related.
+// Adds o to related.R.Card.
+func (o *Card) SetSectionsCardsPosition(ctx context.Context, exec boil.ContextExecutor, insert bool, related *SectionsCardsPosition) error {
+	var err error
+
+	if insert {
+		related.CardID = o.ID
+
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	} else {
+		updateQuery := fmt.Sprintf(
+			"UPDATE `sections_cards_positions` SET %s WHERE %s",
+			strmangle.SetParamNames("`", "`", 0, []string{"card_id"}),
+			strmangle.WhereClause("`", "`", 0, sectionsCardsPositionPrimaryKeyColumns),
+		)
+		values := []interface{}{o.ID, related.ID}
+
+		if boil.DebugMode {
+			fmt.Fprintln(boil.DebugWriter, updateQuery)
+			fmt.Fprintln(boil.DebugWriter, values)
+		}
+
+		if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+			return errors.Wrap(err, "failed to update foreign table")
+		}
+
+		related.CardID = o.ID
+
+	}
+
+	if o.R == nil {
+		o.R = &cardR{
+			SectionsCardsPosition: related,
+		}
+	} else {
+		o.R.SectionsCardsPosition = related
+	}
+
+	if related.R == nil {
+		related.R = &sectionsCardsPositionR{
+			Card: o,
+		}
+	} else {
+		related.R.Card = o
+	}
 	return nil
 }
 

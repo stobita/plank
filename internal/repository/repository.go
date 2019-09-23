@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"os"
 
 	"github.com/pkg/errors"
 	"github.com/stobita/plank/internal/model"
@@ -16,6 +17,9 @@ type repository struct {
 }
 
 func New(db *sql.DB) *repository {
+	if os.Getenv("PRODUCTION") != "true" {
+		boil.DebugMode = true
+	}
 	return &repository{
 		db: db,
 	}
@@ -138,19 +142,45 @@ func (r *repository) SaveNewSection(m *model.Section) error {
 
 func (r *repository) SaveNewCard(m *model.Card) error {
 	ctx := context.Background()
+
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
 	row := rdb.Card{
 		Name:        m.Name,
 		Description: m.Description,
 		SectionID:   m.Section.ID,
 	}
-	if err := row.Insert(ctx, r.db, boil.Whitelist(
+	if err := row.Insert(ctx, tx, boil.Whitelist(
 		rdb.CardColumns.Name,
 		rdb.CardColumns.Description,
 		rdb.CardColumns.SectionID,
 	)); err != nil {
+		tx.Rollback()
 		return err
 	}
+
 	m.ID = row.ID
+
+	if _, err := tx.ExecContext(
+		ctx,
+		"UPDATE sections_cards_positions set position = position+1 WHERE section_id = ? AND position >= ? ORDER BY position DESC;",
+		row.SectionID,
+		m.Position,
+	); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := row.SetSectionsCardsPosition(ctx, tx, true, &rdb.SectionsCardsPosition{SectionID: row.SectionID, Position: m.Position}); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
+
 	return nil
 }
 
@@ -194,12 +224,47 @@ func (r *repository) SaveCard(m *model.Card) error {
 	return nil
 }
 
+func (r *repository) SaveCardPosition(m *model.Card) error {
+	ctx := context.Background()
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(
+		ctx,
+		"UPDATE sections_cards_positions set position = position+1 WHERE section_id = ? AND position >= ? ORDER BY position DESC;",
+		m.Section.ID,
+		m.Position,
+	); err != nil {
+		tx.Rollback()
+		return err
+	}
+	row, err := rdb.SectionsCardsPositions(
+		rdb.SectionsCardsPositionWhere.CardID.EQ(m.ID),
+	).One(ctx, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	if _, err := row.Update(ctx, tx, boil.Whitelist(rdb.SectionsCardsPositionColumns.Position)); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
+	return nil
+}
+
 func (r *repository) DeleteCard(m *model.Card) error {
 	ctx := context.Background()
 	row, err := rdb.Cards(
 		rdb.CardWhere.ID.EQ(m.ID),
+		qm.Load(rdb.CardRels.SectionsCardsPosition),
 	).One(ctx, r.db)
 	if err != nil {
+		return err
+	}
+	if _, err := row.R.SectionsCardsPosition.Delete(ctx, r.db); err != nil {
 		return err
 	}
 	if _, err := row.Delete(ctx, r.db); err != nil {
@@ -230,8 +295,12 @@ func (r *repository) DeleteSection(m *model.Section) error {
 	row, err := rdb.Sections(
 		rdb.SectionWhere.ID.EQ(m.ID),
 		qm.Load(rdb.SectionRels.Cards),
+		qm.Load(rdb.SectionRels.SectionsCardsPositions),
 	).One(ctx, r.db)
 	if err != nil {
+		return err
+	}
+	if _, err := row.R.SectionsCardsPositions.DeleteAll(ctx, r.db); err != nil {
 		return err
 	}
 	if _, err := row.R.Cards.DeleteAll(ctx, r.db); err != nil {
@@ -270,11 +339,20 @@ func (r *repository) DeleteBoard(m *model.Board) error {
 				rdb.SectionRels.Cards,
 			),
 		),
+		qm.Load(
+			qm.Rels(
+				rdb.BoardRels.Sections,
+				rdb.SectionRels.SectionsCardsPositions,
+			),
+		),
 	).One(ctx, r.db)
 	if err != nil {
 		return err
 	}
 	for _, v := range row.R.Sections {
+		if _, err := v.R.SectionsCardsPositions.DeleteAll(ctx, r.db); err != nil {
+			return err
+		}
 		if _, err := v.R.Cards.DeleteAll(ctx, r.db); err != nil {
 			return err
 		}
