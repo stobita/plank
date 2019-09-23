@@ -51,6 +51,7 @@ func getEngine(controller *controller.Controller) (*gin.Engine, error) {
 
 		v1.POST("/sections/:sectionID/cards", controller.PostBoardsSectionsCards())
 		v1.PUT("/sections/:sectionID/cards/:cardID", controller.PutBoardsSectionsCards())
+		v1.PUT("/sections/:sectionID/cards/:cardID/position", controller.PutBoardsSectionsCardsPosition())
 		v1.DELETE("/sections/:sectionID/cards/:cardID", controller.DeleteBoardsSectionsCards())
 	}
 	return r, nil
