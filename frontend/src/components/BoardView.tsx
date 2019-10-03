@@ -1,10 +1,11 @@
 import React, { useContext } from "react";
 import styled from "styled-components";
-import { DataContext } from "../context/dataContext";
 import { SectionPanel } from "./SectionPanel";
+import { MoveContext } from "../context/moveContext";
+import { CardPanelDragPreview } from "./CardPanelDragPreview";
 
 export const BoardView = () => {
-  const { sections } = useContext(DataContext);
+  const { sections } = useContext(MoveContext);
   return (
     <Wrapper>
       <Main>
@@ -12,6 +13,7 @@ export const BoardView = () => {
           <SectionPanel section={v} key={v.id} />
         ))}
       </Main>
+      <CardPanelDragPreview></CardPanelDragPreview>
     </Wrapper>
   );
 };

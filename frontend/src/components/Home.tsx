@@ -29,13 +29,13 @@ export const Home = () => {
         setSections(items);
       });
     }
-  }, [updatedBoardIds]);
+  }, [currentBoard.id, updatedBoardIds, setSections]);
 
   useEffect(() => {
     if (updatedBoardIds.find(v => v === currentBoard.id)) {
       setUpdatedBoardIds(prev => prev.filter(v => v !== currentBoard.id));
     }
-  }, [currentBoard.id]);
+  }, [currentBoard.id, setUpdatedBoardIds, updatedBoardIds]);
 
   useEffect(() => {
     if (currentBoard.id !== 0) {

@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
-import { Section } from "../model/model";
 import { CardList } from "./CardList";
 import { SectionPanelHead } from "./SectionPanelHead";
+import { DraggableSection } from "./MoveContextProvider";
 
 interface Props {
-  section: Section;
+  section: DraggableSection;
 }
 
 export const SectionPanel = (props: Props) => {

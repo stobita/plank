@@ -5,7 +5,6 @@ import theme, { ThemeType } from "../theme";
 import { ThemeProvider } from "styled-components";
 import { GlobalStyleWrapper } from "./GlobalStyleWrapper";
 import { Board } from "../model/model";
-import { create } from "domain";
 
 interface Props {
   children: ReactNode;
@@ -32,13 +31,13 @@ export const ViewContextProvider = (props: Props) => {
     if (boardSettingActive && createBoardActive) {
       setBoardSettingActive(false);
     }
-  }, [createBoardActive]);
+  }, [createBoardActive, boardSettingActive]);
 
   useEffect(() => {
     if (createBoardActive && boardSettingActive) {
       setCreateBoardActive(false);
     }
-  }, [boardSettingActive]);
+  }, [boardSettingActive, createBoardActive]);
 
   return (
     <ThemeProvider theme={theme[themeName]}>
