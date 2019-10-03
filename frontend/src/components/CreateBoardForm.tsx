@@ -3,7 +3,6 @@ import styled from "styled-components";
 import boardsRepository, { CreateBoardPayload } from "../api/boardsRepository";
 import { ButtonPair } from "./ButtonPair";
 import { Button } from "./Button";
-import { CloseButton } from "./CloseButton";
 import { DataContext } from "../context/dataContext";
 import { useForm } from "../hooks/useForm";
 import { Input } from "./Input";

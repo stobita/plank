@@ -1,17 +1,21 @@
 import React from "react";
-import { Card } from "../model/model";
 import styled from "styled-components";
+import { CardListItemBox } from "./CardListItemBox";
 import { CardPanel } from "./CardPanel";
+import { DraggableCard } from "./MoveContextProvider";
 
 interface Props {
-  items: Card[];
+  items: DraggableCard[];
 }
 
 export const CardList = (props: Props) => {
   return (
     <Wrapper>
-      {props.items !== null &&
-        props.items.map(card => <CardPanel card={card} key={card.id} />)}
+      {props.items.map(card => (
+        <CardListItemBox item={card} key={card.id}>
+          <CardPanel card={card}></CardPanel>
+        </CardListItemBox>
+      ))}
     </Wrapper>
   );
 };
