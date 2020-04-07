@@ -1,11 +1,11 @@
 import React, { useContext } from "react";
 import styled from "styled-components";
 import { SectionPanel } from "./SectionPanel";
-import { MoveContext } from "../context/moveContext";
 import { CardPanelDragPreview } from "./CardPanelDragPreview";
+import { DataContext } from "../context/dataContext";
 
 export const BoardView = () => {
-  const { sections } = useContext(MoveContext);
+  const { sections } = useContext(DataContext);
   return (
     <Wrapper>
       <Main>

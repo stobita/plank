@@ -2,10 +2,10 @@ import React from "react";
 import styled from "styled-components";
 import { CardList } from "./CardList";
 import { SectionPanelHead } from "./SectionPanelHead";
-import { DraggableSection } from "./MoveContextProvider";
+import { Section } from "../model/model";
 
 interface Props {
-  section: DraggableSection;
+  section: Section;
 }
 
 export const SectionPanel = (props: Props) => {
@@ -13,7 +13,10 @@ export const SectionPanel = (props: Props) => {
     <Wrapper>
       <Inner>
         <SectionPanelHead section={props.section}></SectionPanelHead>
-        <CardList items={props.section.cards}></CardList>
+        <CardList
+          items={props.section.cards}
+          sectionId={props.section.id}
+        ></CardList>
       </Inner>
     </Wrapper>
   );

@@ -2,22 +2,19 @@ import React, { useContext, ReactNode, useEffect } from "react";
 import { useDrop } from "react-dnd";
 import { ItemTypes } from "../constants/dnd";
 import { MoveContext } from "../context/moveContext";
-import { DraggableCard } from "./MoveContextProvider";
 import styled from "styled-components";
+import { Card } from "../model/model";
 
 interface Props {
-  item: DraggableCard;
+  item: Card;
   children: ReactNode;
 }
 
 export const CardListItemBox = (props: Props) => {
-  const { overCard, dropCard, isDraggingCard } = useContext(MoveContext);
+  const { overCard } = useContext(MoveContext);
   const [{ isOver }, drop] = useDrop({
     accept: ItemTypes.CARD,
-    drop: () => {
-      dropCard();
-    },
-    canDrop: () => props.item.isDropTarget,
+    canDrop: () => false,
     collect: monitor => ({
       isOver: !!monitor.isOver()
     })
@@ -25,34 +22,13 @@ export const CardListItemBox = (props: Props) => {
 
   useEffect(() => {
     if (isOver) {
-      // TODO: fix without setTimeout
-      const timer = setTimeout(() => {
-        overCard(props.item);
-      }, 50);
-      return () => clearTimeout(timer);
+      overCard(props.item);
     }
-  }, [isOver, overCard, props.item]);
+  }, [isOver]);
 
-  return (
-    <Wrapper ref={drop}>
-      {!props.item.isDropTarget ? (
-        <div>{props.children}</div>
-      ) : isDraggingCard ? (
-        <DropTarget>&nbsp;</DropTarget>
-      ) : null}
-    </Wrapper>
-  );
+  return <Wrapper ref={drop}>{props.children}</Wrapper>;
 };
 
 const Wrapper = styled.div`
   margin-top: 8px;
-`;
-
-const DropTarget = styled.div`
-  background: ${props => props.theme.bg};
-  border-radius: 4px;
-  width: 100%;
-  padding: 8px;
-  box-sizing: border-box;
-  height: 48px;
 `;

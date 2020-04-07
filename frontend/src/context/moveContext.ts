@@ -1,27 +1,19 @@
 import { createContext, Dispatch, SetStateAction } from "react";
-import {
-  DraggableCard,
-  DraggableSection
-} from "../components/MoveContextProvider";
+import { DragItem } from "../components/MoveContextProvider";
+import { Card } from "../model/model";
 
 type MoveContextProps = {
-  draggingCard: DraggableCard | undefined;
-  setDraggingCard: Dispatch<SetStateAction<DraggableCard | undefined>>;
   dropCard: () => void;
-  overCard: (card: DraggableCard) => void;
-  sections: DraggableSection[];
-  isDraggingCard: boolean;
-  setIsDraggingCard: Dispatch<SetStateAction<boolean>>;
+  overCard: (card: DragItem) => void;
+  overedCard: DragItem;
+  setOveredCard: Dispatch<SetStateAction<DragItem>>;
 };
 
 const defaultProps = {
-  draggingCard: {} as DraggableCard,
-  setDraggingCard: () => {},
   dropCard: () => {},
   overCard: () => {},
-  sections: [],
-  isDraggingCard: false,
-  setIsDraggingCard: () => {}
+  overedCard: {} as Card,
+  setOveredCard: () => {}
 };
 
 export const MoveContext = createContext<MoveContextProps>(defaultProps);

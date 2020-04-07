@@ -1,22 +1,25 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { CardPanelDetail } from "./CardPanelDetail";
 import { useDrag } from "react-dnd";
-import { DraggableCard } from "./MoveContextProvider";
-import { MoveContext } from "../context/moveContext";
 import { getEmptyImage } from "react-dnd-html5-backend";
+import { Card } from "../model/model";
+import { ItemTypes } from "../constants/dnd";
 
 interface Props {
-  card: DraggableCard;
+  card: Card;
+  onDrag?: (card: Card, v: boolean) => void;
 }
 export const CardPanel = (props: Props) => {
-  const { setDraggingCard, setIsDraggingCard } = useContext(MoveContext);
+  const { card } = props;
   const [expand, setExpand] = useState(false);
+
   const handleOnClick = () => {
     setExpand(prev => !prev);
   };
+
   const [{ isDragging }, drag, preview] = useDrag({
-    item: props.card,
+    item: { ...props.card, type: ItemTypes.CARD },
     previewOptions: {
       anchorX: 0
     },
@@ -25,14 +28,15 @@ export const CardPanel = (props: Props) => {
       isDragging: !!monitor.isDragging()
     })
   });
-  const { card } = props;
+
   useEffect(() => {
-    setIsDraggingCard(isDragging);
-    setDraggingCard(props.card);
-  }, [isDragging, props.card, setIsDraggingCard, setDraggingCard]);
+    props.onDrag && props.onDrag(card, isDragging);
+  }, [isDragging]);
+
   useEffect(() => {
     preview(getEmptyImage(), { captureDraggingState: false });
   }, []);
+
   return (
     <>
       {!isDragging && (
