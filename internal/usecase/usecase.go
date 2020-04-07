@@ -1,11 +1,12 @@
 package usecase
 
 type usecase struct {
-	repository  repository
+	repository  Repository
 	eventBroker eventBroker
 }
 
-func New(r repository, e eventBroker) *usecase {
+// New ...
+func New(r Repository, e eventBroker) *usecase {
 	return &usecase{
 		repository:  r,
 		eventBroker: e,

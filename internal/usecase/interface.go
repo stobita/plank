@@ -2,6 +2,7 @@ package usecase
 
 import "github.com/stobita/plank/internal/model"
 
+// InputPort ...
 type InputPort interface {
 	GetAllBoards() ([]*model.Board, error)
 	CreateBoard(CreateBoardInput) (*model.Board, error)
@@ -23,7 +24,8 @@ type InputPort interface {
 	DeleteSection(id int) error
 }
 
-type repository interface {
+// Repository ...
+type Repository interface {
 	GetAllBoards() ([]*model.Board, error)
 	GetBoard(id uint) (*model.Board, error)
 	SaveNewBoard(*model.Board) error

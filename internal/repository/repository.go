@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stobita/plank/internal/model"
 	"github.com/stobita/plank/internal/rdb"
+	"github.com/stobita/plank/internal/usecase"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries/qm"
 )
@@ -16,7 +17,8 @@ type repository struct {
 	db *sql.DB
 }
 
-func New(db *sql.DB) *repository {
+// New ...
+func New(db *sql.DB) usecase.Repository {
 	if os.Getenv("PRODUCTION") != "true" {
 		boil.DebugMode = true
 	}
