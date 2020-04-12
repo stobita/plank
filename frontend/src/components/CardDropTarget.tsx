@@ -13,15 +13,15 @@ interface Props {
 }
 
 export const CardDropTarget = (props: Props) => {
-  const { overCard } = useContext(MoveContext);
+  const { overCard, overedCard } = useContext(MoveContext);
   const [{ isOver }, drop] = useDrop({
     accept: ItemTypes.CARD,
     drop: (item: DraggableCard) => {
       props.onDrop(item);
     },
-    collect: monitor => ({
-      isOver: !!monitor.isOver()
-    })
+    collect: (monitor) => ({
+      isOver: !!monitor.isOver(),
+    }),
   });
   useEffect(() => {
     if (isOver) {
@@ -39,7 +39,7 @@ export const CardDropTarget = (props: Props) => {
 };
 
 const Wrapper = styled.div`
-  background: ${props => props.theme.bg};
+  background: ${(props) => props.theme.bg};
   border-radius: 4px;
   width: 100%;
   padding: 8px;

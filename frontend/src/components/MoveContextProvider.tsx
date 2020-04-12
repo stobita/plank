@@ -104,6 +104,10 @@ export const MoveContextProvider = (props: Props) => {
     // );
   };
 
+  const moveCardToOtherSection = (
+    targetSectionId: number,
+    card: DraggableCard
+  ) => {};
   const dropCard = () => {
     console.log(overedCard);
     // if (!draggingCard) return;
@@ -153,7 +157,7 @@ export const MoveContextProvider = (props: Props) => {
         dropCard,
         overCard,
         overedCard,
-        setOveredCard
+        setOveredCard,
       }}
     >
       {props.children}

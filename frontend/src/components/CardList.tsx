@@ -14,42 +14,55 @@ interface Props {
 
 export const CardList = (props: Props) => {
   const { items } = props;
-  const { overedCard } = useContext(MoveContext);
+  const { overedCard, dropCard } = useContext(MoveContext);
   const [list, setList] = useState<DragItem[]>([]);
 
   useEffect(() => {
-    setList(items.slice());
+    if (items !== null) {
+      setList(items.slice());
+    }
   }, [items]);
 
   useEffect(() => {
     // TODO: fix
     if (!("id" in overedCard)) {
     } else if (overedCard.section.id === props.sectionId) {
-      const toIndex = list.findIndex(v => "id" in v && v.id === overedCard.id);
-      const next = list.filter(v => "id" in v);
+      const toIndex = list.findIndex(
+        (v) => "id" in v && v.id === overedCard.id
+      );
+      const next = list.filter((v) => "id" in v);
       next.splice(toIndex, 0, { kind: "target" });
       setList(next);
     } else {
-      setList(prev => prev.filter(v => "id" in v));
+      setList((prev) => prev.filter((v) => "id" in v));
     }
   }, [overedCard]);
 
   const handleOnDrag = (card: Card, v: boolean) => {
     if (v) {
-      const toIndex = list.findIndex(v => "id" in v && v.id === card.id);
-      const next = list.filter(v => "id" in v);
+      const toIndex = list.findIndex((v) => "id" in v && v.id === card.id);
+      const next = list.filter((v) => "id" in v);
       next.splice(toIndex, 0, { kind: "target" });
       setList(next);
     } else {
-      setList(prev => prev.filter(v => "id" in v));
+      setList((prev) => prev.filter((v) => "id" in v));
     }
   };
 
-  const handleOnDrop = (card: Card) => {};
+  const handleOnDrop = (card: Card) => {
+    if (props.sectionId === card.section.id) {
+      const fromIndex = list.findIndex((v) => "id" in v && v.id === card.id);
+      const toIndex = list.findIndex((v) => !("id" in v));
+      const next = list.filter((_, i) => i !== fromIndex);
+      next.splice(toIndex, 0, card);
+      setList(next);
+    } else {
+    }
+  };
 
   return (
     <Wrapper>
-      {list.map(item => (
+      {list.map((item) => (
         <Item key={"id" in item ? item.id : 0}>
           {!("id" in item) ? (
             <CardDropTarget
