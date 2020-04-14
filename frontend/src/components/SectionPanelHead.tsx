@@ -7,15 +7,15 @@ import { CreateCardForm } from "./CreateCardForm";
 import { Section } from "../model/model";
 import { DeleteConfirmation } from "./DeleteConfirmation";
 import boardsRepository from "../api/boardsRepository";
-import { DataContext } from "../context/dataContext";
 import { EditSectionForm } from "./EditSectionForm";
+import { BoardContext } from "../context/boardContext";
 
 interface Props {
   section: Section;
 }
 
 export const SectionPanelHead = (props: Props) => {
-  const { setSections } = useContext(DataContext);
+  const { setSections } = useContext(BoardContext);
   const [formActive, setFormActive] = useState(false);
   const [deleteActive, setDeleteActive] = useState(false);
   const [editActive, setEditActive] = useState(false);
@@ -24,19 +24,19 @@ export const SectionPanelHead = (props: Props) => {
     if (deleteActive) {
       setDeleteActive(false);
     }
-    setFormActive(prev => !prev);
+    setFormActive((prev) => !prev);
   };
   const handleAfterCreateCard = () => {
     setFormActive(false);
   };
   const handleOnClickMore = () => {
-    setMore(prev => !prev);
+    setMore((prev) => !prev);
   };
   const handleOnClickDelete = () => {
     if (formActive) {
       setFormActive(false);
     }
-    setDeleteActive(prev => !prev);
+    setDeleteActive((prev) => !prev);
   };
   const handleOnSubmitDelete = async () => {
     await boardsRepository.deleteSection(
@@ -117,7 +117,7 @@ const HeadRight = styled.div`
 
 const Menu = styled.div<{ active: boolean }>`
   transition: 0.5s;
-  max-width: ${props => (props.active ? 128 : 0)}px;
+  max-width: ${(props) => (props.active ? 128 : 0)}px;
   overflow: hidden;
 `;
 
@@ -128,7 +128,7 @@ const Name = styled.h3`
 `;
 
 const MoreIcon = styled(MoreIconImage)`
-  fill: ${props => props.theme.weak};
+  fill: ${(props) => props.theme.weak};
   height: 24px;
   margin-right: 8px;
   cursor: pointer;
@@ -136,7 +136,7 @@ const MoreIcon = styled(MoreIconImage)`
 
 const FormArea = styled.div<{ active: boolean }>`
   transition: 0.5s;
-  max-height: ${props => (props.active ? 180 : 0)}px;
+  max-height: ${(props) => (props.active ? 180 : 0)}px;
   overflow: hidden;
 `;
 
@@ -146,12 +146,12 @@ const FormAreaInner = styled.div`
 
 const DeleteArea = styled.div<{ active: boolean }>`
   transition: 0.5s;
-  max-height: ${props => (props.active ? 160 : 0)}px;
+  max-height: ${(props) => (props.active ? 160 : 0)}px;
   overflow: hidden;
 `;
 
 const DeleteIcon = styled(DeleteIconImage)`
-  fill: ${props => props.theme.solid};
+  fill: ${(props) => props.theme.solid};
   height: 24px;
   margin-right: 8px;
   cursor: pointer;

@@ -3,9 +3,10 @@ import { Section } from "../model/model";
 import { Input } from "./Input";
 import { useForm } from "../hooks/useForm";
 import boardsRepository, {
-  UpdateSectionPayload
+  UpdateSectionPayload,
 } from "../api/boardsRepository";
 import { DataContext } from "../context/dataContext";
+import { BoardContext } from "../context/boardContext";
 
 interface Props {
   item: Section;
@@ -13,7 +14,7 @@ interface Props {
 }
 export const EditSectionForm = (props: Props) => {
   const { item } = props;
-  const { setSections } = useContext(DataContext);
+  const { setSections } = useContext(BoardContext);
   const updateSection = async () => {
     await boardsRepository.updateSection(item.board.id, item.id, formValue);
     const current = await boardsRepository.getBoardSections(item.board.id);

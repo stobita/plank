@@ -4,12 +4,13 @@ import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { CreateBoardForm } from "./CreateBoardForm";
 import { ViewContext } from "../context/viewContext";
-import boardsRepository from "../api/boardsRepository";
 import { DataContext } from "../context/dataContext";
 import { BoardView } from "./BoardView";
 import { EventContext } from "../context/eventContext";
 import { BoardSetting } from "./BoardSetting";
 import { HomeInterrupt } from "./HomeInterrupt";
+import { BoardContext } from "../context/boardContext";
+import { BoardContextProvider } from "./BoardContextProvider";
 
 export const Home = () => {
   const {
@@ -18,32 +19,16 @@ export const Home = () => {
     setBoardSettingActive,
     currentBoard,
     setCurrentBoard,
-    boardSettingActive
+    boardSettingActive,
   } = useContext(ViewContext);
   const { updatedBoardIds, setUpdatedBoardIds } = useContext(EventContext);
-  const { setSections, boards } = useContext(DataContext);
+  const { boards } = useContext(DataContext);
 
   useEffect(() => {
-    if (updatedBoardIds.find(v => v === currentBoard.id)) {
-      boardsRepository.getBoardSections(currentBoard.id).then(items => {
-        setSections(items);
-      });
-    }
-  }, [currentBoard.id, updatedBoardIds, setSections]);
-
-  useEffect(() => {
-    if (updatedBoardIds.find(v => v === currentBoard.id)) {
-      setUpdatedBoardIds(prev => prev.filter(v => v !== currentBoard.id));
+    if (updatedBoardIds.find((v) => v === currentBoard.id)) {
+      setUpdatedBoardIds((prev) => prev.filter((v) => v !== currentBoard.id));
     }
   }, [currentBoard.id, setUpdatedBoardIds, updatedBoardIds]);
-
-  useEffect(() => {
-    if (currentBoard.id !== 0) {
-      boardsRepository.getBoardSections(currentBoard.id).then(items => {
-        setSections(items);
-      });
-    }
-  }, [currentBoard.id, setSections]);
 
   useEffect(() => {
     if (currentBoard.id === 0 && boards.length > 0) {
@@ -66,7 +51,9 @@ export const Home = () => {
           <Header />
         </Head>
         <Main>
-          <BoardView />
+          <BoardContextProvider>
+            <BoardView />
+          </BoardContextProvider>
         </Main>
         {createBoardActive && (
           <HomeInterrupt onClickClose={handleOnClickInterruptClose}>
@@ -85,7 +72,7 @@ export const Home = () => {
 
 const Wrapper = styled.div`
   display: flex;
-  color: ${props => props.theme.solid};
+  color: ${(props) => props.theme.solid};
   min-height: 100vh;
 `;
 
@@ -117,7 +104,7 @@ const Main = styled.div`
   justify-content: center;
   padding: 16px;
   flex: 1;
-  background: ${props => props.theme.bg};
+  background: ${(props) => props.theme.bg};
   margin-top: 56px;
   overflow: auto;
 `;

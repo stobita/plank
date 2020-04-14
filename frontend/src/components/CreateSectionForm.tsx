@@ -4,10 +4,10 @@ import { Button } from "./Button";
 import styled from "styled-components";
 import { useForm } from "../hooks/useForm";
 import boardsRepository, {
-  CreateSectionPayload
+  CreateSectionPayload,
 } from "../api/boardsRepository";
 import { ViewContext } from "../context/viewContext";
-import { DataContext } from "../context/dataContext";
+import { BoardContext } from "../context/boardContext";
 
 interface Props {
   afterSubmit: () => void;
@@ -15,7 +15,7 @@ interface Props {
 
 export const CreateSectionForm = (props: Props) => {
   const { currentBoard } = useContext(ViewContext);
-  const { setSections } = useContext(DataContext);
+  const { setSections } = useContext(BoardContext);
   const createSection = async () => {
     await boardsRepository.createSection(currentBoard.id, formValue);
     const current = await boardsRepository.getBoardSections(currentBoard.id);
@@ -27,7 +27,7 @@ export const CreateSectionForm = (props: Props) => {
     formValue,
     handleOnChangeInput,
     handleOnSubmit,
-    initializeFormValue
+    initializeFormValue,
   } = useForm<CreateSectionPayload>({ name: "" }, createSection);
   return (
     <Wrapper>

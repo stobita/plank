@@ -44,7 +44,7 @@ CREATE TABLE sections_cards_positions (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   section_id INT UNSIGNED NOT NULL,
   card_id INT UNSIGNED NOT NULL,
-  position INT UNSIGNED NOT NULL,
+  position DOUBLE UNSIGNED NOT NULL,
   created_at datetime default current_timestamp,
   updated_at datetime default current_timestamp on update current_timestamp,
   PRIMARY KEY (id),

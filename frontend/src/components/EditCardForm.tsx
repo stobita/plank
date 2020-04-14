@@ -4,14 +4,14 @@ import { Button } from "./Button";
 import { Input } from "./Input";
 import { Textarea } from "./Textarea";
 import sectionsRepository, {
-  UpdateCardPayload
+  UpdateCardPayload,
 } from "../api/sectionsRepository";
 import { useForm } from "../hooks/useForm";
 import { Card } from "../model/model";
 import boardsRepository from "../api/boardsRepository";
 import { ViewContext } from "../context/viewContext";
-import { DataContext } from "../context/dataContext";
 import { ButtonPair } from "./ButtonPair";
+import { BoardContext } from "../context/boardContext";
 
 interface Props {
   item: Card;
@@ -20,7 +20,7 @@ interface Props {
 }
 export const EditCardForm = (props: Props) => {
   const { currentBoard } = useContext(ViewContext);
-  const { setSections } = useContext(DataContext);
+  const { setSections } = useContext(BoardContext);
   const { item } = props;
   const updateCard = async () => {
     await sectionsRepository.updateCard(item.section.id, item.id, formValue);

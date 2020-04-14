@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"log"
 	"os"
+	"sort"
 
 	"github.com/pkg/errors"
 	"github.com/stobita/plank/internal/model"
@@ -100,6 +100,12 @@ func (r *repository) GetBoardSectionsWithCards(board *model.Board) ([]*model.Sec
 	rows, err := rdb.Sections(
 		rdb.SectionWhere.BoardID.EQ(board.ID),
 		qm.Load(rdb.SectionRels.Cards),
+		qm.Load(
+			qm.Rels(
+				rdb.SectionRels.Cards,
+				rdb.CardRels.SectionsCardsPosition,
+			),
+		),
 		qm.Load(rdb.SectionRels.Board),
 	).All(ctx, r.db)
 	if err != nil {
@@ -113,8 +119,12 @@ func (r *repository) GetBoardSectionsWithCards(board *model.Board) ([]*model.Sec
 				ID:          card.ID,
 				Name:        card.Name,
 				Description: card.Description,
+				Position:    card.R.SectionsCardsPosition.Position,
 			})
 		}
+		sort.Slice(cards, func(i, j int) bool {
+			return cards[i].Position < cards[j].Position
+		})
 		sections = append(sections, &model.Section{
 			ID:    row.ID,
 			Name:  row.Name,
@@ -167,15 +177,15 @@ func (r *repository) SaveNewCard(m *model.Card) error {
 
 	m.ID = row.ID
 
-	if _, err := tx.ExecContext(
-		ctx,
-		"UPDATE sections_cards_positions set position = position+1 WHERE section_id = ? AND position >= ? ORDER BY position DESC;",
-		row.SectionID,
-		m.Position,
-	); err != nil {
-		tx.Rollback()
-		return err
-	}
+	// if _, err := tx.ExecContext(
+	// 	ctx,
+	// 	"UPDATE sections_cards_positions set position = position+1 WHERE section_id = ? AND position >= ? ORDER BY position DESC;",
+	// 	row.SectionID,
+	// 	m.Position,
+	// ); err != nil {
+	// 	tx.Rollback()
+	// 	return err
+	// }
 
 	if err := row.SetSectionsCardsPosition(ctx, tx, true, &rdb.SectionsCardsPosition{SectionID: row.SectionID, Position: m.Position}); err != nil {
 		tx.Rollback()
@@ -244,25 +254,29 @@ func (r *repository) MoveCardPosition(id uint, prevID uint) error {
 	prevRow, err := rdb.SectionsCardsPositions(
 		rdb.SectionsCardsPositionWhere.CardID.EQ(prevID),
 	).One(ctx, tx)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		tx.Rollback()
 		return err
 	}
-	followingRow, err := rdb.SectionsCardsPositions(
-		rdb.SectionsCardsPositionWhere.Position.GT(prevRow.Position),
-		qm.OrderBy(rdb.SectionsCardsPositionColumns.Position),
-	).One(ctx, tx)
+	var followingRow *rdb.SectionsCardsPosition
+	if prevRow != nil {
 
+		followingRow, err = rdb.SectionsCardsPositions(
+			rdb.SectionsCardsPositionWhere.Position.GT(prevRow.Position),
+			qm.OrderBy(rdb.SectionsCardsPositionColumns.Position),
+		).One(ctx, tx)
+		if err != nil && err != sql.ErrNoRows {
+			tx.Rollback()
+			return err
+		}
+	}
 	var position float64
 
 	if prevRow == nil {
-		log.Println("prev == nil")
 		position = 0
 	} else if followingRow == nil {
-		log.Println("folloing == nil")
 		position = prevRow.Position + 1
 	} else {
-		log.Println("not nil")
 		position = (prevRow.Position + followingRow.Position) / 2
 	}
 

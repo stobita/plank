@@ -6,6 +6,8 @@ import { DragItem } from "./MoveContextProvider";
 import { CardDropTarget } from "./CardDropTarget";
 import { MoveContext } from "../context/moveContext";
 import { Card } from "../model/model";
+import { BoardContext } from "../context/boardContext";
+import sectionsRepository from "../api/sectionsRepository";
 
 interface Props {
   items: Card[];
@@ -14,7 +16,8 @@ interface Props {
 
 export const CardList = (props: Props) => {
   const { items } = props;
-  const { overedCard, dropCard } = useContext(MoveContext);
+  const { overedCard } = useContext(MoveContext);
+  const { removeCard } = useContext(BoardContext);
   const [list, setList] = useState<DragItem[]>([]);
 
   useEffect(() => {
@@ -53,10 +56,27 @@ export const CardList = (props: Props) => {
     if (props.sectionId === card.section.id) {
       const fromIndex = list.findIndex((v) => "id" in v && v.id === card.id);
       const toIndex = list.findIndex((v) => !("id" in v));
+      const prev = list[toIndex - 1];
       const next = list.filter((_, i) => i !== fromIndex);
+
       next.splice(toIndex, 0, card);
       setList(next);
+
+      if (prev && "id" in prev) {
+        sectionsRepository.updateCardPosition(
+          props.sectionId,
+          card.id,
+          prev.id
+        );
+      } else {
+        sectionsRepository.updateCardPosition(props.sectionId, card.id, null);
+      }
     } else {
+      const toIndex = list.findIndex((v) => !("id" in v));
+      const next = list;
+      next.splice(toIndex, 1, card);
+      setList(next);
+      removeCard(card);
     }
   };
 

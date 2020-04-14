@@ -9,6 +9,7 @@ import { DataContext } from "../context/dataContext";
 import { ViewContext } from "../context/viewContext";
 import boardsRepository from "../api/boardsRepository";
 import { EditCardForm } from "./EditCardForm";
+import { BoardContext } from "../context/boardContext";
 
 interface Props {
   item: Card;
@@ -17,18 +18,18 @@ interface Props {
 export const CardPanelDetail = (props: Props) => {
   const { item } = props;
   const { currentBoard } = useContext(ViewContext);
-  const { setSections } = useContext(DataContext);
+  const { setSections } = useContext(BoardContext);
   const [deleteConfirmation, setDeleteConfirmation] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const handleOnClickDelete = (e: React.MouseEvent<HTMLOrSVGElement>) => {
     e.stopPropagation();
     setIsEdit(false);
-    setDeleteConfirmation(prev => !prev);
+    setDeleteConfirmation((prev) => !prev);
   };
   const handleOnClickEdit = (e: React.MouseEvent<HTMLOrSVGElement>) => {
     e.stopPropagation();
     setDeleteConfirmation(false);
-    setIsEdit(prev => !prev);
+    setIsEdit((prev) => !prev);
   };
 
   const handleOnClickCancel = () => {
@@ -91,7 +92,7 @@ const Top = styled.div`
 
 const Expand = styled.div<{ expand: boolean }>`
   transition: 0.5s;
-  max-height: ${props => (props.expand ? 128 : 0)}px;
+  max-height: ${(props) => (props.expand ? 128 : 0)}px;
   overflow: hidden;
   box-sizing: border-box;
 `;
@@ -111,12 +112,12 @@ const Operator = styled.div`
 `;
 
 const DeleteIcon = styled(DeleteIconImage)`
-  fill: ${props => props.theme.solid};
+  fill: ${(props) => props.theme.solid};
   height: 24px;
   margin-left: 8px;
 `;
 
 const EditIcon = styled(EditIconImage)`
-  fill: ${props => props.theme.solid};
+  fill: ${(props) => props.theme.solid};
   height: 24px;
 `;

@@ -3,7 +3,7 @@ import { Card } from "../model/model";
 
 const resource = "/sections";
 const childResouce = {
-  cards: "cards"
+  cards: "cards",
 };
 
 export type CreateCardPayload = {
@@ -40,5 +40,17 @@ export default {
       `${resource}/${sectionId}/${childResouce.cards}/${cardId}`
     );
     return;
-  }
+  },
+  async updateCardPosition(
+    sectionId: number,
+    cardId: number,
+    prevCardId: number | null
+  ): Promise<void> {
+    await repository.put(
+      `${resource}/${sectionId}/${childResouce.cards}/${cardId}/position`,
+      {
+        prevCardId,
+      }
+    );
+  },
 };

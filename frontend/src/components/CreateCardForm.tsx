@@ -5,12 +5,12 @@ import { Button } from "./Button";
 import boardsRepository from "../api/boardsRepository";
 import { useForm } from "../hooks/useForm";
 import sectionsRepository, {
-  CreateCardPayload
+  CreateCardPayload,
 } from "../api/sectionsRepository";
 import { Section } from "../model/model";
-import { DataContext } from "../context/dataContext";
 import { ViewContext } from "../context/viewContext";
 import { Textarea } from "./Textarea";
+import { BoardContext } from "../context/boardContext";
 
 interface Props {
   section: Section;
@@ -19,7 +19,7 @@ interface Props {
 
 export const CreateCardForm = (props: Props) => {
   const { currentBoard } = useContext(ViewContext);
-  const { setSections } = useContext(DataContext);
+  const { setSections } = useContext(BoardContext);
   const createCard = async () => {
     await sectionsRepository.createCard(props.section.id, formValue);
     const current = await boardsRepository.getBoardSections(currentBoard.id);
@@ -31,7 +31,7 @@ export const CreateCardForm = (props: Props) => {
     formValue,
     handleOnChangeInput,
     handleOnSubmit,
-    initializeFormValue
+    initializeFormValue,
   } = useForm<CreateCardPayload>({ name: "", description: "" }, createCard);
   return (
     <Wrapper>
