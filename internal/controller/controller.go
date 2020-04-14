@@ -241,22 +241,15 @@ func (c *Controller) PutBoardsSectionsCardsPosition() gin.HandlerFunc {
 			return
 		}
 		input := usecase.UpdateCardPositionInput{
-			Position: uint(reqBody.Position),
+			PrevCardID: uint(reqBody.PrevCardID),
 		}
 
-		result, err := c.inputPort.UpdateCardPosition(cardID, input)
-		if err != nil {
+		if err := c.inputPort.UpdateCardPosition(uint(cardID), input); err != nil {
+			log.Print(err)
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
 			return
 		}
-
-		res, err := presenter.GetCardResponse(result)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
-			return
-		}
-
-		ctx.JSON(http.StatusOK, res)
+		ctx.JSON(http.StatusOK, nil)
 	}
 }
 

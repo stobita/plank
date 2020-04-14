@@ -17,7 +17,7 @@ type Section struct {
 type Card struct {
 	ID          uint
 	Name        string
-	Position    uint
+	Position    float64
 	Description string
 	Section     *Section
 }

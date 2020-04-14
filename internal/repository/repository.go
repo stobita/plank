@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"log"
 	"os"
 
 	"github.com/pkg/errors"
@@ -226,28 +227,46 @@ func (r *repository) SaveCard(m *model.Card) error {
 	return nil
 }
 
-func (r *repository) SaveCardPosition(m *model.Card) error {
+func (r *repository) MoveCardPosition(id uint, prevID uint) error {
 	ctx := context.Background()
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		return err
-	}
-	if _, err := tx.ExecContext(
-		ctx,
-		"UPDATE sections_cards_positions set position = position+1 WHERE section_id = ? AND position >= ? ORDER BY position DESC;",
-		m.Section.ID,
-		m.Position,
-	); err != nil {
 		tx.Rollback()
 		return err
 	}
 	row, err := rdb.SectionsCardsPositions(
-		rdb.SectionsCardsPositionWhere.CardID.EQ(m.ID),
+		rdb.SectionsCardsPositionWhere.CardID.EQ(id),
 	).One(ctx, tx)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
+	prevRow, err := rdb.SectionsCardsPositions(
+		rdb.SectionsCardsPositionWhere.CardID.EQ(prevID),
+	).One(ctx, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	followingRow, err := rdb.SectionsCardsPositions(
+		rdb.SectionsCardsPositionWhere.Position.GT(prevRow.Position),
+		qm.OrderBy(rdb.SectionsCardsPositionColumns.Position),
+	).One(ctx, tx)
+
+	var position float64
+
+	if prevRow == nil {
+		log.Println("prev == nil")
+		position = 0
+	} else if followingRow == nil {
+		log.Println("folloing == nil")
+		position = prevRow.Position + 1
+	} else {
+		log.Println("not nil")
+		position = (prevRow.Position + followingRow.Position) / 2
+	}
+
+	row.Position = position
 	if _, err := row.Update(ctx, tx, boil.Whitelist(rdb.SectionsCardsPositionColumns.Position)); err != nil {
 		tx.Rollback()
 		return err
