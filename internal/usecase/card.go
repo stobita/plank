@@ -17,8 +17,9 @@ type UpdateCardInput struct {
 	Description string
 }
 
-type UpdateCardPositionInput struct {
-	PrevCardID uint
+type MoveCardPositionInput struct {
+	PrevCardID      uint
+	TargetSectionID uint
 }
 
 func (u *usecase) CreateCard(input CreateCardInput) (*model.Card, error) {
@@ -52,8 +53,8 @@ func (u *usecase) UpdateCard(id int, input UpdateCardInput) (*model.Card, error)
 	return card, u.repository.SaveCard(card)
 }
 
-func (u *usecase) UpdateCardPosition(id uint, input UpdateCardPositionInput) error {
-	if err := u.repository.MoveCardPosition(id, input.PrevCardID); err != nil {
+func (u *usecase) MoveCardPosition(id uint, input MoveCardPositionInput) error {
+	if err := u.repository.MoveCardPosition(id, input.PrevCardID, input.TargetSectionID); err != nil {
 		return err
 	}
 	return nil

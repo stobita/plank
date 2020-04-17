@@ -14,7 +14,8 @@ type postBoardsSectionsCardsRequestBody struct {
 }
 
 type putBoardsSectionsCardsPositionRequestBody struct {
-	PrevCardID uint `json:"prevCardId"`
+	PrevCardID      uint `json:"prevCardId"`
+	TargetSectionID uint `json:"targetSectionId"`
 }
 
 type putBoardsRequestBoady = postBoardsRequestBody

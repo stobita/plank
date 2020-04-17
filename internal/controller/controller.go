@@ -240,11 +240,12 @@ func (c *Controller) PutBoardsSectionsCardsPosition() gin.HandlerFunc {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
 			return
 		}
-		input := usecase.UpdateCardPositionInput{
-			PrevCardID: uint(reqBody.PrevCardID),
+		input := usecase.MoveCardPositionInput{
+			PrevCardID:      uint(reqBody.PrevCardID),
+			TargetSectionID: uint(reqBody.TargetSectionID),
 		}
 
-		if err := c.inputPort.UpdateCardPosition(uint(cardID), input); err != nil {
+		if err := c.inputPort.MoveCardPosition(uint(cardID), input); err != nil {
 			log.Print(err)
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
 			return

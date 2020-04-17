@@ -63,20 +63,34 @@ export const CardList = (props: Props) => {
       setList(next);
 
       if (prev && "id" in prev) {
-        sectionsRepository.updateCardPosition(
-          props.sectionId,
-          card.id,
-          prev.id
-        );
+        sectionsRepository.updateCardPosition(props.sectionId, card.id, {
+          prevCardId: prev.id,
+          targetSectionId: null,
+        });
       } else {
-        sectionsRepository.updateCardPosition(props.sectionId, card.id, null);
+        sectionsRepository.updateCardPosition(props.sectionId, card.id, {
+          prevCardId: null,
+          targetSectionId: null,
+        });
       }
     } else {
       const toIndex = list.findIndex((v) => !("id" in v));
+      const prev = list[toIndex - 1];
       const next = list;
       next.splice(toIndex, 1, card);
       setList(next);
       removeCard(card);
+      if (prev && "id" in prev) {
+        sectionsRepository.updateCardPosition(card.section.id, card.id, {
+          prevCardId: prev.id,
+          targetSectionId: props.sectionId,
+        });
+      } else {
+        sectionsRepository.updateCardPosition(card.section.id, card.id, {
+          prevCardId: null,
+          targetSectionId: props.sectionId,
+        });
+      }
     }
   };
 

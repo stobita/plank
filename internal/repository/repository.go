@@ -237,7 +237,7 @@ func (r *repository) SaveCard(m *model.Card) error {
 	return nil
 }
 
-func (r *repository) MoveCardPosition(id uint, prevID uint) error {
+func (r *repository) MoveCardPosition(id uint, prevID uint, targetSectionID uint) error {
 	ctx := context.Background()
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -281,9 +281,27 @@ func (r *repository) MoveCardPosition(id uint, prevID uint) error {
 	}
 
 	row.Position = position
+	if targetSectionID != 0 {
+		row.SectionID = targetSectionID
+	}
 	if _, err := row.Update(ctx, tx, boil.Whitelist(rdb.SectionsCardsPositionColumns.Position)); err != nil {
 		tx.Rollback()
 		return err
+	}
+
+	if targetSectionID != 0 {
+		card, err := rdb.Cards(
+			rdb.CardWhere.ID.EQ(id),
+		).One(ctx, tx)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		card.SectionID = targetSectionID
+		if _, err := card.Update(ctx, tx, boil.Whitelist(rdb.CardColumns.SectionID)); err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 
 	tx.Commit()

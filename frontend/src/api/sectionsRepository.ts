@@ -11,6 +11,11 @@ export type CreateCardPayload = {
   description: string;
 };
 
+export type MoveCardPayload = {
+  prevCardId: number | null;
+  targetSectionId: number | null;
+};
+
 export type UpdateCardPayload = CreateCardPayload;
 
 export default {
@@ -44,13 +49,11 @@ export default {
   async updateCardPosition(
     sectionId: number,
     cardId: number,
-    prevCardId: number | null
+    payload: MoveCardPayload
   ): Promise<void> {
     await repository.put(
       `${resource}/${sectionId}/${childResouce.cards}/${cardId}/position`,
-      {
-        prevCardId,
-      }
+      payload
     );
   },
 };
