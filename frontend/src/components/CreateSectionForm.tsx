@@ -7,7 +7,7 @@ import boardsRepository, {
   CreateSectionPayload,
 } from "../api/boardsRepository";
 import { ViewContext } from "../context/viewContext";
-import { BoardContext } from "../context/boardContext";
+import { DataContext } from "../context/dataContext";
 
 interface Props {
   afterSubmit: () => void;
@@ -15,7 +15,7 @@ interface Props {
 
 export const CreateSectionForm = (props: Props) => {
   const { currentBoard } = useContext(ViewContext);
-  const { setSections } = useContext(BoardContext);
+  const { setSections } = useContext(DataContext);
   const createSection = async () => {
     await boardsRepository.createSection(currentBoard.id, formValue);
     const current = await boardsRepository.getBoardSections(currentBoard.id);

@@ -1,6 +1,6 @@
 import React, { ReactNode, useState } from "react";
 import { DataContext } from "../context/dataContext";
-import { Board } from "../model/model";
+import { Board, Section } from "../model/model";
 
 interface Props {
   children: ReactNode;
@@ -8,11 +8,14 @@ interface Props {
 
 export const DataContextProvider = (props: Props) => {
   const [boards, setBoards] = useState<Board[]>([]);
+  const [sections, setSections] = useState<Section[]>([]);
   return (
     <DataContext.Provider
       value={{
         boards,
         setBoards,
+        sections,
+        setSections,
       }}
     >
       {props.children}

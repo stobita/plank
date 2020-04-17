@@ -8,14 +8,14 @@ import { Section } from "../model/model";
 import { DeleteConfirmation } from "./DeleteConfirmation";
 import boardsRepository from "../api/boardsRepository";
 import { EditSectionForm } from "./EditSectionForm";
-import { BoardContext } from "../context/boardContext";
+import { DataContext } from "../context/dataContext";
 
 interface Props {
   section: Section;
 }
 
 export const SectionPanelHead = (props: Props) => {
-  const { setSections } = useContext(BoardContext);
+  const { setSections } = useContext(DataContext);
   const [formActive, setFormActive] = useState(false);
   const [deleteActive, setDeleteActive] = useState(false);
   const [editActive, setEditActive] = useState(false);

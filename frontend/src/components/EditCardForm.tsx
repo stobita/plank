@@ -11,7 +11,7 @@ import { Card } from "../model/model";
 import boardsRepository from "../api/boardsRepository";
 import { ViewContext } from "../context/viewContext";
 import { ButtonPair } from "./ButtonPair";
-import { BoardContext } from "../context/boardContext";
+import { DataContext } from "../context/dataContext";
 
 interface Props {
   item: Card;
@@ -20,7 +20,7 @@ interface Props {
 }
 export const EditCardForm = (props: Props) => {
   const { currentBoard } = useContext(ViewContext);
-  const { setSections } = useContext(BoardContext);
+  const { setSections } = useContext(DataContext);
   const { item } = props;
   const updateCard = async () => {
     await sectionsRepository.updateCard(item.section.id, item.id, formValue);

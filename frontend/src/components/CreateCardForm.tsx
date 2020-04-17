@@ -10,7 +10,7 @@ import sectionsRepository, {
 import { Section } from "../model/model";
 import { ViewContext } from "../context/viewContext";
 import { Textarea } from "./Textarea";
-import { BoardContext } from "../context/boardContext";
+import { DataContext } from "../context/dataContext";
 
 interface Props {
   section: Section;
@@ -19,7 +19,7 @@ interface Props {
 
 export const CreateCardForm = (props: Props) => {
   const { currentBoard } = useContext(ViewContext);
-  const { setSections } = useContext(BoardContext);
+  const { setSections } = useContext(DataContext);
   const createCard = async () => {
     await sectionsRepository.createCard(props.section.id, formValue);
     const current = await boardsRepository.getBoardSections(currentBoard.id);

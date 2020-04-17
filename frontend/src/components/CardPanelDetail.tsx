@@ -5,11 +5,10 @@ import { ReactComponent as DeleteIconImage } from "../assets/trash.svg";
 import { ReactComponent as EditIconImage } from "../assets/edit.svg";
 import { DeleteConfirmation } from "./DeleteConfirmation";
 import sectionsRepository from "../api/sectionsRepository";
-import { DataContext } from "../context/dataContext";
 import { ViewContext } from "../context/viewContext";
 import boardsRepository from "../api/boardsRepository";
 import { EditCardForm } from "./EditCardForm";
-import { BoardContext } from "../context/boardContext";
+import { DataContext } from "../context/dataContext";
 
 interface Props {
   item: Card;
@@ -18,7 +17,7 @@ interface Props {
 export const CardPanelDetail = (props: Props) => {
   const { item } = props;
   const { currentBoard } = useContext(ViewContext);
-  const { setSections } = useContext(BoardContext);
+  const { setSections } = useContext(DataContext);
   const [deleteConfirmation, setDeleteConfirmation] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const handleOnClickDelete = (e: React.MouseEvent<HTMLOrSVGElement>) => {

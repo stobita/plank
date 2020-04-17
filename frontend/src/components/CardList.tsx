@@ -6,7 +6,6 @@ import { DragItem } from "./MoveContextProvider";
 import { CardDropTarget } from "./CardDropTarget";
 import { MoveContext } from "../context/moveContext";
 import { Card } from "../model/model";
-import { BoardContext } from "../context/boardContext";
 import sectionsRepository from "../api/sectionsRepository";
 
 interface Props {
@@ -17,7 +16,6 @@ interface Props {
 export const CardList = (props: Props) => {
   const { items } = props;
   const { overedCard } = useContext(MoveContext);
-  const { removeCard } = useContext(BoardContext);
   const [list, setList] = useState<DragItem[]>([]);
 
   useEffect(() => {
@@ -79,7 +77,7 @@ export const CardList = (props: Props) => {
       const next = list;
       next.splice(toIndex, 1, card);
       setList(next);
-      removeCard(card);
+      // removeCard(card);
       if (prev && "id" in prev) {
         sectionsRepository.updateCardPosition(card.section.id, card.id, {
           prevCardId: prev.id,

@@ -2,17 +2,16 @@ import React, { useContext, useEffect } from "react";
 import styled from "styled-components";
 import { SectionPanel } from "./SectionPanel";
 import { CardPanelDragPreview } from "./CardPanelDragPreview";
-import { BoardContext } from "../context/boardContext";
 import { ViewContext } from "../context/viewContext";
 import { EventContext } from "../context/eventContext";
 import boardsRepository from "../api/boardsRepository";
 import { Section } from "../model/model";
+import { DataContext } from "../context/dataContext";
 
 export const BoardView = () => {
-  const { sections } = useContext(BoardContext);
+  const { sections, setSections } = useContext(DataContext);
   const { currentBoard } = useContext(ViewContext);
   const { updatedBoardIds } = useContext(EventContext);
-  const { setSections } = useContext(BoardContext);
 
   useEffect(() => {
     if (updatedBoardIds.find((v) => v === currentBoard.id)) {

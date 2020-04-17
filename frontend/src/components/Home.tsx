@@ -9,8 +9,6 @@ import { BoardView } from "./BoardView";
 import { EventContext } from "../context/eventContext";
 import { BoardSetting } from "./BoardSetting";
 import { HomeInterrupt } from "./HomeInterrupt";
-import { BoardContext } from "../context/boardContext";
-import { BoardContextProvider } from "./BoardContextProvider";
 
 export const Home = () => {
   const {
@@ -51,9 +49,7 @@ export const Home = () => {
           <Header />
         </Head>
         <Main>
-          <BoardContextProvider>
-            <BoardView />
-          </BoardContextProvider>
+          <BoardView />
         </Main>
         {createBoardActive && (
           <HomeInterrupt onClickClose={handleOnClickInterruptClose}>
