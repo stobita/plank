@@ -4,7 +4,7 @@ import { SectionPanel } from "./SectionPanel";
 import { ViewContext } from "../context/viewContext";
 import { EventContext } from "../context/eventContext";
 import boardsRepository from "../api/boardsRepository";
-import { Section } from "../model/model";
+import { Section, Card } from "../model/model";
 import {
   DragDropContext,
   Droppable,
@@ -68,7 +68,13 @@ export const BoardView = () => {
     droppableDestination: DraggableLocation
   ) => {
     const sourceClone = Array.from(source.cards);
-    const destClone = Array.from(destination.cards);
+    console.log(destination);
+    let destClone: Card[];
+    if (destination.cards === null) {
+      destClone = [];
+    } else {
+      destClone = Array.from(destination.cards) || [];
+    }
     const [removed] = sourceClone.splice(droppableSource.index, 1);
 
     destClone.splice(droppableDestination.index, 0, removed);
