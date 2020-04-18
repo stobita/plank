@@ -13,9 +13,13 @@ type postBoardsSectionsCardsRequestBody struct {
 	Description string `json:"description"`
 }
 
-type putBoardsSectionsCardsPositionRequestBody struct {
-	PrevCardID      uint `json:"prevCardId"`
-	TargetSectionID uint `json:"targetSectionId"`
+type reorderCardRequestBody struct {
+	Position uint `json:"position"`
+}
+
+type moveCardRequestBody struct {
+	Position             uint `json:"position"`
+	DestinationSectionID uint `json:"destinationSectionId"`
 }
 
 type putBoardsRequestBoady = postBoardsRequestBody

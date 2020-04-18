@@ -27,7 +27,7 @@ type SectionsCardsPosition struct {
 	ID        uint      `boil:"id" json:"id" toml:"id" yaml:"id"`
 	SectionID uint      `boil:"section_id" json:"section_id" toml:"section_id" yaml:"section_id"`
 	CardID    uint      `boil:"card_id" json:"card_id" toml:"card_id" yaml:"card_id"`
-	Position  float64   `boil:"position" json:"position" toml:"position" yaml:"position"`
+	Position  uint      `boil:"position" json:"position" toml:"position" yaml:"position"`
 	CreatedAt null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
 	UpdatedAt null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
@@ -53,33 +53,18 @@ var SectionsCardsPositionColumns = struct {
 
 // Generated where
 
-type whereHelperfloat64 struct{ field string }
-
-func (w whereHelperfloat64) EQ(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperfloat64) NEQ(x float64) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.NEQ, x)
-}
-func (w whereHelperfloat64) LT(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperfloat64) LTE(x float64) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelperfloat64) GT(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperfloat64) GTE(x float64) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
 var SectionsCardsPositionWhere = struct {
 	ID        whereHelperuint
 	SectionID whereHelperuint
 	CardID    whereHelperuint
-	Position  whereHelperfloat64
+	Position  whereHelperuint
 	CreatedAt whereHelpernull_Time
 	UpdatedAt whereHelpernull_Time
 }{
 	ID:        whereHelperuint{field: "`sections_cards_positions`.`id`"},
 	SectionID: whereHelperuint{field: "`sections_cards_positions`.`section_id`"},
 	CardID:    whereHelperuint{field: "`sections_cards_positions`.`card_id`"},
-	Position:  whereHelperfloat64{field: "`sections_cards_positions`.`position`"},
+	Position:  whereHelperuint{field: "`sections_cards_positions`.`position`"},
 	CreatedAt: whereHelpernull_Time{field: "`sections_cards_positions`.`created_at`"},
 	UpdatedAt: whereHelpernull_Time{field: "`sections_cards_positions`.`updated_at`"},
 }

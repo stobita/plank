@@ -17,7 +17,10 @@ type InputPort interface {
 	DeleteBoard(id int) error
 
 	UpdateCard(id int, input UpdateCardInput) (*model.Card, error)
-	MoveCardPosition(id uint, input MoveCardPositionInput) error
+
+	ReorderCardPosition(id uint, position uint) error
+	MoveCardPosition(id uint, position uint, destinationSectionID uint) error
+
 	DeleteCard(id int) error
 
 	UpdateSection(id int, input UpdateSectionInput) (*model.Section, error)
@@ -42,7 +45,8 @@ type Repository interface {
 	GetCard(id uint) (*model.Card, error)
 	DeleteCard(*model.Card) error
 	SaveCard(*model.Card) error
-	MoveCardPosition(id uint, prevID uint, targetSectionID uint) error
+	ReorderCardPosition(id uint, position uint) error
+	MoveCardPosition(id uint, position uint, destinationSectionID uint) error
 
 	SaveNewCard(*model.Card) error
 }

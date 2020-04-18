@@ -22,8 +22,8 @@ export const CardList = (props: Props) => {
   return (
     <Wrapper>
       {list.map((item, index) => (
-        <Item key={"id" in item ? item.id : 0}>
-          <Draggable draggableId={String(item.id)} index={index}>
+        <Item key={item.id}>
+          <Draggable draggableId={`card-${item.id}`} index={index}>
             {(provided, snapshot) => (
               <CardItemBox
                 ref={provided.innerRef}

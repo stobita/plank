@@ -226,9 +226,9 @@ func (c *Controller) PutBoardsSectionsCards() gin.HandlerFunc {
 	}
 }
 
-func (c *Controller) PutBoardsSectionsCardsPosition() gin.HandlerFunc {
+func (c *Controller) ReorderCard() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var reqBody putBoardsSectionsCardsPositionRequestBody
+		var reqBody reorderCardRequestBody
 		if err := ctx.ShouldBindJSON(&reqBody); err != nil {
 			log.Print(err)
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
@@ -240,12 +240,32 @@ func (c *Controller) PutBoardsSectionsCardsPosition() gin.HandlerFunc {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
 			return
 		}
-		input := usecase.MoveCardPositionInput{
-			PrevCardID:      uint(reqBody.PrevCardID),
-			TargetSectionID: uint(reqBody.TargetSectionID),
+
+		if err := c.inputPort.ReorderCardPosition(uint(cardID), reqBody.Position); err != nil {
+			log.Print(err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+			return
+		}
+		ctx.JSON(http.StatusOK, nil)
+	}
+}
+
+func (c *Controller) MoveCard() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var reqBody moveCardRequestBody
+		if err := ctx.ShouldBindJSON(&reqBody); err != nil {
+			log.Print(err)
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
+			return
+		}
+		cardID, err := strconv.Atoi(ctx.Param("cardID"))
+		if err != nil {
+			log.Print(err)
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
+			return
 		}
 
-		if err := c.inputPort.MoveCardPosition(uint(cardID), input); err != nil {
+		if err := c.inputPort.MoveCardPosition(uint(cardID), reqBody.Position, reqBody.DestinationSectionID); err != nil {
 			log.Print(err)
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
 			return

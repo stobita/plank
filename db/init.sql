@@ -1,6 +1,7 @@
 -- TODO: use migration tool
 
 DROP TABLE IF EXISTS sections_cards_positions;
+DROP TABLE IF EXISTS boards_sections_positions;
 DROP TABLE IF EXISTS cards;
 DROP TABLE IF EXISTS sections;
 DROP TABLE IF EXISTS boards;
@@ -44,7 +45,7 @@ CREATE TABLE sections_cards_positions (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   section_id INT UNSIGNED NOT NULL,
   card_id INT UNSIGNED NOT NULL,
-  position DOUBLE UNSIGNED NOT NULL,
+  position INT UNSIGNED NOT NULL,
   created_at datetime default current_timestamp,
   updated_at datetime default current_timestamp on update current_timestamp,
   PRIMARY KEY (id),
@@ -56,5 +57,24 @@ CREATE TABLE sections_cards_positions (
   CONSTRAINT fk_sections_cards_positions_card_id
     FOREIGN KEY (card_id)
     REFERENCES cards(id)
+);
+
+
+CREATE TABLE boards_sections_positions (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  board_id INT UNSIGNED NOT NULL,
+  section_id INT UNSIGNED NOT NULL,
+  position INT UNSIGNED NOT NULL,
+  created_at datetime default current_timestamp,
+  updated_at datetime default current_timestamp on update current_timestamp,
+  PRIMARY KEY (id),
+  UNIQUE uq_boards_sections_positions_section_id(section_id),
+  UNIQUE uq_boards_sections_positions_position_board_id(board_id, position),
+  CONSTRAINT fk_boards_sections_positions_board_id
+    FOREIGN KEY (board_id)
+    REFERENCES boards(id),
+  CONSTRAINT fk_boards_sections_positions_section_id
+    FOREIGN KEY (section_id)
+    REFERENCES sections(id)
 );
 

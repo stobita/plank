@@ -46,14 +46,25 @@ export default {
     );
     return;
   },
-  async updateCardPosition(
+  async reorderCardPosition(
     sectionId: number,
     cardId: number,
-    payload: MoveCardPayload
+    position: number
   ): Promise<void> {
     await repository.put(
-      `${resource}/${sectionId}/${childResouce.cards}/${cardId}/position`,
-      payload
+      `${resource}/${sectionId}/${childResouce.cards}/${cardId}/reorder`,
+      { position }
+    );
+  },
+  async moveCard(
+    sectionId: number,
+    cardId: number,
+    position: number,
+    destinationSectionId: number
+  ): Promise<void> {
+    await repository.put(
+      `${resource}/${sectionId}/${childResouce.cards}/${cardId}/move`,
+      { position, destinationSectionId }
     );
   },
 };

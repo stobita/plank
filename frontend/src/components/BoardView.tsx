@@ -13,6 +13,8 @@ import {
   DraggableLocation,
 } from "react-beautiful-dnd";
 import { DataContext } from "../context/dataContext";
+import sectionsRepository from "../api/sectionsRepository";
+import repository from "../api/repository";
 
 export const BoardView = () => {
   const { sections, setSections } = useContext(DataContext);
@@ -35,14 +37,14 @@ export const BoardView = () => {
     }
   }, [currentBoard.id, setSections]);
 
-  const reorderCard = (
+  const reorderCard = async (
     section: Section,
     startIndex: number,
     endIndex: number
   ) => {
-    const list = sections.find((v: Section) => v.id === section.id)?.cards;
-    if (!list) return;
-    const result = Array.from(list);
+    const cards = sections.find((v: Section) => v.id === section.id)?.cards;
+    if (!cards) return;
+    const result = Array.from(cards);
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
 
@@ -52,9 +54,15 @@ export const BoardView = () => {
     const sectionResult = Array.from(sections);
     sectionResult[sectionIndex].cards = result;
     setSections(sectionResult);
+
+    await sectionsRepository.reorderCardPosition(
+      section.id,
+      removed.id,
+      endIndex
+    );
   };
 
-  const moveCard = (
+  const moveCard = async (
     source: Section,
     destination: Section,
     droppableSource: DraggableLocation,
@@ -77,6 +85,13 @@ export const BoardView = () => {
     sectionResult[sourceSectionIndex].cards = sourceClone;
     sectionResult[destSectionIndex].cards = destClone;
     setSections(sectionResult);
+
+    await sectionsRepository.moveCard(
+      source.id,
+      removed.id,
+      droppableDestination.index,
+      destination.id
+    );
   };
 
   const reorderSection = (startIndex: number, endIndex: number) => {
@@ -109,10 +124,15 @@ export const BoardView = () => {
       reorderSection(source.index, destination!.index);
     }
   };
+  console.log(currentBoard);
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="board" type="BOARD" direction="horizontal">
+      <Droppable
+        droppableId={`board-${currentBoard.id}`}
+        type="BOARD"
+        direction="horizontal"
+      >
         {(provided, snapshot) => (
           <Wrapper ref={provided.innerRef}>
             <Main>
@@ -133,6 +153,7 @@ export const BoardView = () => {
                   )}
                 </Draggable>
               ))}
+              {provided.placeholder}
             </Main>
           </Wrapper>
         )}
