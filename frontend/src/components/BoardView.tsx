@@ -129,7 +129,6 @@ export const BoardView = () => {
       reorderSection(source.index, destination!.index);
     }
   };
-  console.log(currentBoard);
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
