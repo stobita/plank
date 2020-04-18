@@ -29,6 +29,7 @@ export type Card = {
   name: string;
   description: string;
   section: Section;
+  position?: number;
 };
 
 export const cardInit: Card = {

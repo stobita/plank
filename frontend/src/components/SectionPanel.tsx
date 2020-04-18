@@ -3,22 +3,36 @@ import styled from "styled-components";
 import { CardList } from "./CardList";
 import { SectionPanelHead } from "./SectionPanelHead";
 import { Section } from "../model/model";
+import {
+  DroppableProvided,
+  Droppable,
+  DraggableProvided,
+} from "react-beautiful-dnd";
 
 interface Props {
   section: Section;
+  provided: DraggableProvided;
 }
 
 export const SectionPanel = (props: Props) => {
   return (
-    <Wrapper>
-      <Inner>
-        <SectionPanelHead section={props.section}></SectionPanelHead>
-        <CardList
-          items={props.section.cards}
-          sectionId={props.section.id}
-        ></CardList>
-      </Inner>
-    </Wrapper>
+    <Droppable key={props.section.id} droppableId={String(props.section.id)}>
+      {(provided, snapshot) => (
+        <div ref={provided.innerRef}>
+          <Wrapper>
+            <Inner>
+              <div {...props.provided.dragHandleProps}>
+                <SectionPanelHead section={props.section}></SectionPanelHead>
+              </div>
+              <CardList
+                items={props.section.cards}
+                provided={provided}
+              ></CardList>
+            </Inner>
+          </Wrapper>
+        </div>
+      )}
+    </Droppable>
   );
 };
 
@@ -31,7 +45,7 @@ const Wrapper = styled.div`
 `;
 
 const Inner = styled.div`
-  background: ${props => props.theme.main};
+  background: ${(props) => props.theme.main};
   padding: 8px;
   box-sizing: border-box;
   border-radius: 4px;

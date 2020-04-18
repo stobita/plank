@@ -1,22 +1,17 @@
-import React, { useEffect, useContext, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { CardListItemBox } from "./CardListItemBox";
 import { CardPanel } from "./CardPanel";
-import { DragItem } from "./MoveContextProvider";
-import { CardDropTarget } from "./CardDropTarget";
-import { MoveContext } from "../context/moveContext";
 import { Card } from "../model/model";
-import sectionsRepository from "../api/sectionsRepository";
+import { Draggable, DroppableProvided } from "react-beautiful-dnd";
 
 interface Props {
   items: Card[];
-  sectionId: number;
+  provided: DroppableProvided;
 }
 
 export const CardList = (props: Props) => {
   const { items } = props;
-  const { overedCard } = useContext(MoveContext);
-  const [list, setList] = useState<DragItem[]>([]);
+  const [list, setList] = useState<Card[]>([]);
 
   useEffect(() => {
     if (items !== null) {
@@ -24,95 +19,24 @@ export const CardList = (props: Props) => {
     }
   }, [items]);
 
-  useEffect(() => {
-    // TODO: fix
-    if (!("id" in overedCard)) {
-    } else if (overedCard.section.id === props.sectionId) {
-      const toIndex = list.findIndex(
-        (v) => "id" in v && v.id === overedCard.id
-      );
-      const next = list.filter((v) => "id" in v);
-      next.splice(toIndex, 0, { kind: "target" });
-      setList(next);
-    } else {
-      setList((prev) => prev.filter((v) => "id" in v));
-    }
-  }, [overedCard]);
-
-  const handleOnDrag = (card: Card, v: boolean) => {
-    if (v) {
-      const toIndex = list.findIndex((v) => "id" in v && v.id === card.id);
-      const next = list.filter((v) => "id" in v);
-      next.splice(toIndex, 0, { kind: "target" });
-      setList(next);
-    } else {
-      setList((prev) => prev.filter((v) => "id" in v));
-    }
-  };
-
-  const handleOnDrop = (card: Card) => {
-    if (props.sectionId === card.section.id) {
-      const fromIndex = list.findIndex((v) => "id" in v && v.id === card.id);
-      const toIndex = list.findIndex((v) => !("id" in v));
-      const prev = list[toIndex - 1];
-      const next = list.filter((_, i) => i !== fromIndex);
-
-      next.splice(toIndex, 0, card);
-      setList(next);
-
-      if (prev && "id" in prev) {
-        sectionsRepository.updateCardPosition(props.sectionId, card.id, {
-          prevCardId: prev.id,
-          targetSectionId: null,
-        });
-      } else {
-        sectionsRepository.updateCardPosition(props.sectionId, card.id, {
-          prevCardId: null,
-          targetSectionId: null,
-        });
-      }
-    } else {
-      const toIndex = list.findIndex((v) => !("id" in v));
-      const prev = list[toIndex - 1];
-      const next = list;
-      next.splice(toIndex, 1, card);
-      setList(next);
-      // removeCard(card);
-      if (prev && "id" in prev) {
-        sectionsRepository.updateCardPosition(card.section.id, card.id, {
-          prevCardId: prev.id,
-          targetSectionId: props.sectionId,
-        });
-      } else {
-        sectionsRepository.updateCardPosition(card.section.id, card.id, {
-          prevCardId: null,
-          targetSectionId: props.sectionId,
-        });
-      }
-    }
-  };
-
   return (
     <Wrapper>
-      {list.map((item) => (
+      {list.map((item, index) => (
         <Item key={"id" in item ? item.id : 0}>
-          {!("id" in item) ? (
-            <CardDropTarget
-              active={!("id" in item)}
-              key={0}
-              onDrop={handleOnDrop}
-            ></CardDropTarget>
-          ) : (
-            <CardListItemBox item={item}>
-              <CardPanel
-                key={item.id}
-                card={item}
-                onDrag={handleOnDrag}
-              ></CardPanel>
-            </CardListItemBox>
-          )}
+          <Draggable draggableId={String(item.id)} index={index}>
+            {(provided, snapshot) => (
+              <CardItemBox
+                ref={provided.innerRef}
+                {...provided.draggableProps}
+                {...provided.dragHandleProps}
+              >
+                <CardPanel card={item}></CardPanel>
+              </CardItemBox>
+            )}
+          </Draggable>
         </Item>
       ))}
+      {props.provided.placeholder}
     </Wrapper>
   );
 };
@@ -123,3 +47,7 @@ const Wrapper = styled.div`
 `;
 
 const Item = styled.div``;
+
+const CardItemBox = styled.div`
+  margin-top: 8px;
+`;

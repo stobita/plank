@@ -1,11 +1,17 @@
 import React, { useContext, useEffect } from "react";
 import styled from "styled-components";
 import { SectionPanel } from "./SectionPanel";
-import { CardPanelDragPreview } from "./CardPanelDragPreview";
 import { ViewContext } from "../context/viewContext";
 import { EventContext } from "../context/eventContext";
 import boardsRepository from "../api/boardsRepository";
 import { Section } from "../model/model";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+  DraggableLocation,
+} from "react-beautiful-dnd";
 import { DataContext } from "../context/dataContext";
 
 export const BoardView = () => {
@@ -29,18 +35,109 @@ export const BoardView = () => {
     }
   }, [currentBoard.id, setSections]);
 
+  const reorderCard = (
+    section: Section,
+    startIndex: number,
+    endIndex: number
+  ) => {
+    const list = sections.find((v: Section) => v.id === section.id)?.cards;
+    if (!list) return;
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+
+    const sectionIndex = sections.findIndex(
+      (v: Section) => v.id === section.id
+    );
+    const sectionResult = Array.from(sections);
+    sectionResult[sectionIndex].cards = result;
+    setSections(sectionResult);
+  };
+
+  const moveCard = (
+    source: Section,
+    destination: Section,
+    droppableSource: DraggableLocation,
+    droppableDestination: DraggableLocation
+  ) => {
+    const sourceClone = Array.from(source.cards);
+    const destClone = Array.from(destination.cards);
+    const [removed] = sourceClone.splice(droppableSource.index, 1);
+
+    destClone.splice(droppableDestination.index, 0, removed);
+
+    const sourceSectionIndex = sections.findIndex((v) => v.id === source.id);
+
+    const destSectionIndex = sections.findIndex(
+      (v) => v.id === destination!.id
+    );
+
+    const sectionResult = Array.from(sections);
+
+    sectionResult[sourceSectionIndex].cards = sourceClone;
+    sectionResult[destSectionIndex].cards = destClone;
+    setSections(sectionResult);
+  };
+
+  const reorderSection = (startIndex: number, endIndex: number) => {
+    const result = Array.from(sections);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    setSections(result);
+  };
+
+  const onDragEnd = (result: DropResult) => {
+    const { source, destination, type } = result;
+    if (type !== "BOARD") {
+      if (source.droppableId === destination?.droppableId) {
+        const section = sections.find(
+          (v: Section) => String(v.id) === source.droppableId
+        );
+        if (!section) return;
+        reorderCard(section, source.index, destination.index);
+      } else {
+        const sourceSection = sections.find(
+          (v: Section) => String(v.id) === source.droppableId
+        );
+        const destSection = sections.find(
+          (v: Section) => String(v.id) === destination?.droppableId
+        );
+        if (!sourceSection || !destSection || !destination) return;
+        moveCard(sourceSection, destSection, source, destination);
+      }
+    } else {
+      reorderSection(source.index, destination!.index);
+    }
+  };
+
   return (
-    <Wrapper>
-      <Main>
-        {sections
-          .slice()
-          .sort((v) => v.position)
-          .map((v: Section) => (
-            <SectionPanel section={v} key={v.id} />
-          ))}
-      </Main>
-      <CardPanelDragPreview></CardPanelDragPreview>
-    </Wrapper>
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Droppable droppableId="board" type="BOARD" direction="horizontal">
+        {(provided, snapshot) => (
+          <Wrapper ref={provided.innerRef}>
+            <Main>
+              {sections.map((section: Section, index) => (
+                <Draggable
+                  draggableId={String(section.id)}
+                  index={index}
+                  key={section.id}
+                >
+                  {(provided, snapshot) => (
+                    <div ref={provided.innerRef} {...provided.draggableProps}>
+                      <SectionPanel
+                        section={section}
+                        key={section.id}
+                        provided={provided}
+                      />
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+            </Main>
+          </Wrapper>
+        )}
+      </Droppable>
+    </DragDropContext>
   );
 };
 
