@@ -226,6 +226,30 @@ func (c *Controller) PutBoardsSectionsCards() gin.HandlerFunc {
 	}
 }
 
+func (c *Controller) ReorderSection() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var reqBody reorderSectionRequestBody
+		if err := ctx.ShouldBindJSON(&reqBody); err != nil {
+			log.Print(err)
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
+			return
+		}
+		sectionID, err := strconv.Atoi(ctx.Param("sectionID"))
+		if err != nil {
+			log.Print(err)
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
+			return
+		}
+
+		if err := c.inputPort.ReorderSectionPosition(uint(sectionID), reqBody.Position); err != nil {
+			log.Print(err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+			return
+		}
+		ctx.JSON(http.StatusOK, nil)
+	}
+}
+
 func (c *Controller) ReorderCard() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var reqBody reorderCardRequestBody

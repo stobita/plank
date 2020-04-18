@@ -101,6 +101,7 @@ func (r *repository) GetBoardSectionsWithCards(board *model.Board) ([]*model.Sec
 	rows, err := rdb.Sections(
 		rdb.SectionWhere.BoardID.EQ(board.ID),
 		qm.Load(rdb.SectionRels.Cards),
+		qm.Load(rdb.SectionRels.BoardsSectionsPosition),
 		qm.Load(
 			qm.Rels(
 				rdb.SectionRels.Cards,
@@ -133,24 +134,51 @@ func (r *repository) GetBoardSectionsWithCards(board *model.Board) ([]*model.Sec
 			Board: &model.Board{
 				ID: row.R.Board.ID,
 			},
+			Position: row.R.BoardsSectionsPosition.Position,
 		})
 	}
+	sort.Slice(sections, func(i, j int) bool {
+		return sections[i].Position < sections[j].Position
+	})
 	return sections, nil
 }
 
 func (r *repository) SaveNewSection(m *model.Section) error {
 	ctx := context.Background()
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
 	row := rdb.Section{
 		Name:    m.Name,
 		BoardID: m.Board.ID,
 	}
-	if err := row.Insert(ctx, r.db, boil.Whitelist(
+	if err := row.Insert(ctx, tx, boil.Whitelist(
 		rdb.SectionColumns.Name,
 		rdb.SectionColumns.BoardID,
 	)); err != nil {
 		return err
 	}
 	m.ID = row.ID
+
+	if _, err := tx.ExecContext(
+		ctx,
+		"UPDATE boards_sections_positions set position = position+1 WHERE board_id = ? AND position >= ? ORDER BY position DESC;",
+		row.BoardID,
+		m.Position,
+	); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := row.SetBoardsSectionsPosition(ctx, tx, true, &rdb.BoardsSectionsPosition{BoardID: row.BoardID, Position: m.Position}); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	tx.Commit()
+
 	return nil
 }
 
@@ -314,6 +342,67 @@ func (r *repository) MoveCardPosition(id uint, position uint, newSectionID uint)
 
 }
 
+func (r *repository) ReorderSectionPosition(id uint, position uint) error {
+	ctx := context.Background()
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		tx.Rollback()
+		return errors.Wrap(err, "failed transaction begin")
+	}
+	section, err := rdb.Sections(
+		rdb.SectionWhere.ID.EQ(id),
+	).One(ctx, tx)
+	if err != nil {
+		tx.Rollback()
+		return errors.Wrap(err, "failed get section")
+	}
+
+	oldPosition, err := rdb.BoardsSectionsPositions(
+		rdb.BoardsSectionsPositionWhere.SectionID.EQ(section.ID),
+		rdb.BoardsSectionsPositionWhere.BoardID.EQ(section.BoardID),
+	).One(ctx, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	if _, err := oldPosition.Delete(ctx, tx); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if _, err := tx.ExecContext(
+		ctx,
+		"UPDATE boards_sections_positions set position = position-1 WHERE board_id = ? AND position > ? ORDER BY position;",
+		section.BoardID,
+		oldPosition.Position,
+	); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if _, err := tx.ExecContext(
+		ctx,
+		"UPDATE boards_sections_positions set position = position+1 WHERE board_id = ? AND position >= ? ORDER BY position DESC;",
+		section.BoardID,
+		position,
+	); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	newPosition := rdb.BoardsSectionsPosition{
+		SectionID: section.ID,
+		BoardID:   section.BoardID,
+		Position:  position,
+	}
+	if err := newPosition.Insert(ctx, tx, boil.Infer()); err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}
+
 func (r *repository) ReorderCardPosition(id uint, position uint) error {
 	ctx := context.Background()
 	tx, err := r.db.BeginTx(ctx, nil)
@@ -371,29 +460,10 @@ func (r *repository) ReorderCardPosition(id uint, position uint) error {
 		SectionID: card.SectionID,
 		Position:  position,
 	}
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
 	if err := newPosition.Insert(ctx, tx, boil.Infer()); err != nil {
 		tx.Rollback()
 		return err
 	}
-	// if targetSectionID != 0 {
-	// 	card, err := rdb.Cards(
-	// 		rdb.CardWhere.ID.EQ(id),
-	// 	).One(ctx, tx)
-	// 	if err != nil {
-	// 		tx.Rollback()
-	// 		return err
-	// 	}
-	// 	card.SectionID = targetSectionID
-	// 	if _, err := card.Update(ctx, tx, boil.Whitelist(rdb.CardColumns.SectionID)); err != nil {
-	// 		tx.Rollback()
-	// 		return err
-	// 	}
-	// }
-
 	tx.Commit()
 	return nil
 }

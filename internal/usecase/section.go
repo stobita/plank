@@ -68,3 +68,7 @@ func (u *usecase) DeleteSection(id int) error {
 	}
 	return u.repository.DeleteSection(section)
 }
+
+func (u *usecase) ReorderSectionPosition(id uint, position uint) error {
+	return u.repository.ReorderSectionPosition(id, position)
+}

@@ -25,6 +25,7 @@ type InputPort interface {
 
 	UpdateSection(id int, input UpdateSectionInput) (*model.Section, error)
 	DeleteSection(id int) error
+	ReorderSectionPosition(id uint, position uint) error
 }
 
 // Repository ...
@@ -39,6 +40,7 @@ type Repository interface {
 	SaveNewSection(*model.Section) error
 	SaveSection(*model.Section) error
 	DeleteSection(*model.Section) error
+	ReorderSectionPosition(id uint, position uint) error
 
 	GetBoardSectionsWithCards(*model.Board) ([]*model.Section, error)
 

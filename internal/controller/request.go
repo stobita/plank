@@ -13,6 +13,10 @@ type postBoardsSectionsCardsRequestBody struct {
 	Description string `json:"description"`
 }
 
+type reorderSectionRequestBody struct {
+	Position uint `json:"position"`
+}
+
 type reorderCardRequestBody struct {
 	Position uint `json:"position"`
 }

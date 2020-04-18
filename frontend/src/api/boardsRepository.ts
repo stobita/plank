@@ -3,7 +3,7 @@ import { Board, Section } from "../model/model";
 
 const resource = "/boards";
 const childResouce = {
-  sections: "sections"
+  sections: "sections",
 };
 
 export type CreateBoardPayload = {
@@ -26,7 +26,7 @@ export default {
   async getBoards(): Promise<Board[]> {
     const res = await repository
       .get<Collection<Board>>(`${resource}`)
-      .catch(e => {
+      .catch((e) => {
         console.error(e);
         return null;
       });
@@ -55,7 +55,7 @@ export default {
       .get<Collection<Section>>(
         `${resource}/${boardId}/${childResouce.sections}`
       )
-      .catch(e => {
+      .catch((e) => {
         console.error(e);
         return null;
       });
@@ -90,5 +90,17 @@ export default {
       `${resource}/${boardId}/${childResouce.sections}/${sectionId}`
     );
     return;
-  }
+  },
+  async reorderSection(
+    boardId: number,
+    sectionId: number,
+    position: number
+  ): Promise<void> {
+    await repository.put(
+      `${resource}/${boardId}/${childResouce.sections}/${sectionId}/reorder`,
+      {
+        position,
+      }
+    );
+  },
 };

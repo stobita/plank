@@ -14,7 +14,6 @@ import {
 } from "react-beautiful-dnd";
 import { DataContext } from "../context/dataContext";
 import sectionsRepository from "../api/sectionsRepository";
-import repository from "../api/repository";
 
 export const BoardView = () => {
   const { sections, setSections } = useContext(DataContext);
@@ -94,11 +93,17 @@ export const BoardView = () => {
     );
   };
 
-  const reorderSection = (startIndex: number, endIndex: number) => {
+  const reorderSection = async (startIndex: number, endIndex: number) => {
     const result = Array.from(sections);
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
     setSections(result);
+
+    await boardsRepository.reorderSection(
+      currentBoard.id,
+      removed.id,
+      endIndex
+    );
   };
 
   const onDragEnd = (result: DropResult) => {
