@@ -19,6 +19,12 @@ type cardJSON struct {
 	Name        string      `json:"name"`
 	Description string      `json:"description"`
 	Section     sectionJSON `json:"section"`
+	Labels      []labelJSON `json:"labels"`
+}
+
+type labelJSON struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
 }
 
 type addCardEvent struct {
@@ -50,6 +56,17 @@ func GetBoardsResponse(model []*model.Board) (listJSON, error) {
 	return json, nil
 }
 
+func GetLabelsResponse(model []*model.Label) (listJSON, error) {
+	json := listJSON{Items: []interface{}{}}
+	for _, v := range model {
+		json.Items = append(json.Items, &labelJSON{
+			ID:   v.ID,
+			Name: v.Name,
+		})
+	}
+	return json, nil
+}
+
 func GetBoardResponse(model *model.Board) (boardJSON, error) {
 	return boardJSON{
 		ID:   model.ID,
@@ -69,6 +86,13 @@ func GetSectionsResponse(model []*model.Section) (listJSON, error) {
 	for _, v := range model {
 		var cards []cardJSON
 		for _, card := range v.Cards {
+			labels := make([]labelJSON, len(card.Labels))
+			for i, v := range card.Labels {
+				labels[i] = labelJSON{
+					ID:   v.ID,
+					Name: v.Name,
+				}
+			}
 			cards = append(cards, cardJSON{
 				ID:          card.ID,
 				Name:        card.Name,
@@ -76,6 +100,7 @@ func GetSectionsResponse(model []*model.Section) (listJSON, error) {
 				Section: sectionJSON{
 					ID: v.ID,
 				},
+				Labels: labels,
 			})
 		}
 		json.Items = append(json.Items, &sectionJSON{

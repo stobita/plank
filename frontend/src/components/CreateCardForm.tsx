@@ -11,6 +11,7 @@ import { Section } from "../model/model";
 import { ViewContext } from "../context/viewContext";
 import { Textarea } from "./Textarea";
 import { DataContext } from "../context/dataContext";
+import { TagInput } from "./TagInput";
 
 interface Props {
   section: Section;
@@ -19,7 +20,7 @@ interface Props {
 
 export const CreateCardForm = (props: Props) => {
   const { currentBoard } = useContext(ViewContext);
-  const { setSections } = useContext(DataContext);
+  const { setSections, labels } = useContext(DataContext);
   const createCard = async () => {
     await sectionsRepository.createCard(props.section.id, formValue);
     const current = await boardsRepository.getBoardSections(currentBoard.id);
@@ -32,7 +33,11 @@ export const CreateCardForm = (props: Props) => {
     handleOnChangeInput,
     handleOnSubmit,
     initializeFormValue,
-  } = useForm<CreateCardPayload>({ name: "", description: "" }, createCard);
+    onChangeLabel,
+  } = useForm<CreateCardPayload>(
+    { name: "", description: "", labels: [] },
+    createCard
+  );
   return (
     <Wrapper>
       <Form onSubmit={handleOnSubmit}>
@@ -44,6 +49,15 @@ export const CreateCardForm = (props: Props) => {
             type="text"
             placeholder="name"
           ></Input>
+        </Field>
+        <Field>
+          <TagInput
+            name="label"
+            placeholder="label"
+            value={formValue.labels ? formValue.labels : []}
+            onChange={onChangeLabel}
+            labels={labels}
+          />
         </Field>
         <Field>
           <Textarea

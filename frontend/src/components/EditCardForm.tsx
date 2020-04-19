@@ -12,6 +12,7 @@ import boardsRepository from "../api/boardsRepository";
 import { ViewContext } from "../context/viewContext";
 import { ButtonPair } from "./ButtonPair";
 import { DataContext } from "../context/dataContext";
+import { TagInput } from "./TagInput";
 
 interface Props {
   item: Card;
@@ -20,7 +21,7 @@ interface Props {
 }
 export const EditCardForm = (props: Props) => {
   const { currentBoard } = useContext(ViewContext);
-  const { setSections } = useContext(DataContext);
+  const { setSections, labels } = useContext(DataContext);
   const { item } = props;
   const updateCard = async () => {
     await sectionsRepository.updateCard(item.section.id, item.id, formValue);
@@ -28,9 +29,19 @@ export const EditCardForm = (props: Props) => {
     setSections(current);
     props.afterSubmit();
   };
-  const { formValue, handleOnChangeInput, handleOnSubmit } = useForm<
-    UpdateCardPayload
-  >({ name: item.name, description: item.description }, updateCard);
+  const {
+    formValue,
+    handleOnChangeInput,
+    handleOnSubmit,
+    onChangeLabel,
+  } = useForm<UpdateCardPayload>(
+    {
+      name: item.name,
+      description: item.description,
+      labels: item.labels!.map((v) => v.name),
+    },
+    updateCard
+  );
   const onClickWrapper = (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
   };
@@ -45,6 +56,15 @@ export const EditCardForm = (props: Props) => {
             placeholder="name"
             onChange={handleOnChangeInput}
           ></Input>
+        </Field>
+        <Field>
+          <TagInput
+            name="label"
+            placeholder="label"
+            value={formValue.labels ? formValue.labels : []}
+            onChange={onChangeLabel}
+            labels={labels}
+          />
         </Field>
         <Field>
           <Textarea

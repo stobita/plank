@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { CardPanelDetail } from "./CardPanelDetail";
-import { useDrag } from "react-dnd";
-import { getEmptyImage } from "react-dnd-html5-backend";
 import { Card } from "../model/model";
-import { ItemTypes } from "../constants/dnd";
 
 interface Props {
   card: Card;
@@ -24,7 +21,7 @@ export const CardPanel = (props: Props) => {
         <Inner onClick={handleOnClick}>
           <Name>{card.name}</Name>
           <Detail expand={expand}>
-            <CardPanelDetail item={card}></CardPanelDetail>
+            {expand && <CardPanelDetail item={card}></CardPanelDetail>}
           </Detail>
         </Inner>
       </Wrapper>
@@ -50,6 +47,6 @@ const Name = styled.h4`
 
 const Detail = styled.div<{ expand: boolean }>`
   transition: 1s;
-  max-height: ${(props) => (props.expand ? 240 : 0)}px;
+  /** max-height: ${(props) => (props.expand ? 240 : 0)}px; */
   overflow: hidden;
 `;

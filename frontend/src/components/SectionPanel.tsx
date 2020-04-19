@@ -41,6 +41,7 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   min-width: 380px;
+  max-width: 380px;
   box-sizing: border-box;
 `;
 

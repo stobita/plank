@@ -26,6 +26,8 @@ type InputPort interface {
 	UpdateSection(id int, input UpdateSectionInput) (*model.Section, error)
 	DeleteSection(id int) error
 	ReorderSectionPosition(id uint, position uint) error
+
+	GetLabels() ([]*model.Label, error)
 }
 
 // Repository ...
@@ -35,6 +37,9 @@ type Repository interface {
 	SaveNewBoard(*model.Board) error
 	SaveBoard(*model.Board) error
 	DeleteBoard(*model.Board) error
+
+	SaveNewLabel(*model.Label) error
+	GetLabelByName(name string) (*model.Label, error)
 
 	GetSection(id uint) (*model.Section, error)
 	SaveNewSection(*model.Section) error
@@ -51,6 +56,8 @@ type Repository interface {
 	MoveCardPosition(id uint, position uint, destinationSectionID uint) error
 
 	SaveNewCard(*model.Card) error
+
+	GetLabels() ([]*model.Label, error)
 }
 
 type eventBroker interface {

@@ -40,6 +40,24 @@ func (c *Controller) GetBoards() gin.HandlerFunc {
 	}
 }
 
+func (c *Controller) GetLabels() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		labels, err := c.inputPort.GetLabels()
+		if err != nil {
+			log.Println(err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+			return
+		}
+		res, err := presenter.GetLabelsResponse(labels)
+		if err != nil {
+			log.Println(err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+			return
+		}
+		ctx.JSON(http.StatusOK, res)
+	}
+}
+
 func (c *Controller) PostBoards() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var reqBody postBoardsRequestBody
@@ -116,6 +134,7 @@ func (c *Controller) PostBoardsSectionsCards() gin.HandlerFunc {
 			Name:        reqBody.Name,
 			Description: reqBody.Description,
 			SectionID:   uint(sectionID),
+			Labels:      reqBody.Labels,
 		}
 		result, err := c.inputPort.CreateCard(input)
 		if err != nil {
@@ -208,10 +227,12 @@ func (c *Controller) PutBoardsSectionsCards() gin.HandlerFunc {
 		input := usecase.UpdateCardInput{
 			Name:        reqBody.Name,
 			Description: reqBody.Description,
+			Labels:      reqBody.Labels,
 		}
 
 		result, err := c.inputPort.UpdateCard(cardID, input)
 		if err != nil {
+			log.Print(err)
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
 			return
 		}
@@ -307,6 +328,7 @@ func (c *Controller) DeleteBoardsSectionsCards() gin.HandlerFunc {
 			return
 		}
 		if err := c.inputPort.DeleteCard(cardID); err != nil {
+			log.Print(err)
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
 			return
 		}

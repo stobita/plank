@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 export const useForm = <P>(initFormValue: P, submitAction: () => void) => {
   const [formValue, setFormValue] = useState<P>(initFormValue);
@@ -6,12 +6,17 @@ export const useForm = <P>(initFormValue: P, submitAction: () => void) => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     e.persist();
-    setFormValue(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setFormValue((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
   const handleOnSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     submitAction();
   };
+
+  const onChangeLabel = useCallback((items: string[]) => {
+    setFormValue((prev) => ({ ...prev, labels: items }));
+  }, []);
+
   const initializeFormValue = () => {
     setFormValue(initFormValue);
   };
@@ -19,6 +24,7 @@ export const useForm = <P>(initFormValue: P, submitAction: () => void) => {
     formValue,
     handleOnChangeInput,
     handleOnSubmit,
-    initializeFormValue
+    initializeFormValue,
+    onChangeLabel,
   };
 };

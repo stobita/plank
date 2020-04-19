@@ -9,6 +9,7 @@ const childResouce = {
 export type CreateCardPayload = {
   name: string;
   description: string;
+  labels: string[];
 };
 
 export type MoveCardPayload = {

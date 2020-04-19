@@ -7,12 +7,16 @@ var TableNames = struct {
 	Boards                  string
 	BoardsSectionsPositions string
 	Cards                   string
+	CardsLabels             string
+	Labels                  string
 	Sections                string
 	SectionsCardsPositions  string
 }{
 	Boards:                  "boards",
 	BoardsSectionsPositions: "boards_sections_positions",
 	Cards:                   "cards",
+	CardsLabels:             "cards_labels",
+	Labels:                  "labels",
 	Sections:                "sections",
 	SectionsCardsPositions:  "sections_cards_positions",
 }

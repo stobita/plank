@@ -9,8 +9,9 @@ type postBoardsSectionsRequestBody struct {
 }
 
 type postBoardsSectionsCardsRequestBody struct {
-	Name        string `json:"name" binding:"required"`
-	Description string `json:"description"`
+	Name        string   `json:"name" binding:"required"`
+	Description string   `json:"description"`
+	Labels      []string `json:"labels"`
 }
 
 type reorderSectionRequestBody struct {

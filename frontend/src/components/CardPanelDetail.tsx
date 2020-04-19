@@ -56,15 +56,22 @@ export const CardPanelDetail = (props: Props) => {
             afterSubmit={afterUpdateSubmit}
           ></EditCardForm>
         ) : (
-          <>
-            <Description>
-              {item.description !== "" ? item.description : "no description"}
-            </Description>
-            <Operator>
-              <EditIcon onClick={handleOnClickEdit}></EditIcon>
-              <DeleteIcon onClick={handleOnClickDelete}></DeleteIcon>
-            </Operator>
-          </>
+          <TopInner>
+            <TopInnerTop>
+              <Description>
+                {item.description !== "" ? item.description : "no description"}
+              </Description>
+              <Operator>
+                <EditIcon onClick={handleOnClickEdit}></EditIcon>
+                <DeleteIcon onClick={handleOnClickDelete}></DeleteIcon>
+              </Operator>
+            </TopInnerTop>
+            <LabelList>
+              {item.labels.map((v) => (
+                <LabelItem>{v.name}</LabelItem>
+              ))}
+            </LabelList>
+          </TopInner>
         )}
       </Top>
       <Expand expand={deleteConfirmation}>
@@ -87,6 +94,31 @@ const Top = styled.div`
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
+`;
+
+const TopInner = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+`;
+
+const TopInnerTop = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+
+const LabelList = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+`;
+
+const LabelItem = styled.div`
+  padding: 4px 8px;
+  border-radius: 2px;
+  border: 1px solid ${(props) => props.theme.border};
+  margin-left: 8px;
+  background: ${(props) => props.theme.bg};
 `;
 
 const Expand = styled.div<{ expand: boolean }>`

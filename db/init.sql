@@ -2,9 +2,11 @@
 
 DROP TABLE IF EXISTS sections_cards_positions;
 DROP TABLE IF EXISTS boards_sections_positions;
+DROP TABLE IF EXISTS cards_labels;
 DROP TABLE IF EXISTS cards;
 DROP TABLE IF EXISTS sections;
 DROP TABLE IF EXISTS boards;
+DROP TABLE IF EXISTS labels;
 
 -- TODO: use migration tool
 
@@ -78,3 +80,26 @@ CREATE TABLE boards_sections_positions (
     REFERENCES sections(id)
 );
 
+CREATE TABLE labels (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name TEXT NOT NULL,
+  created_at datetime default current_timestamp,
+  updated_at datetime default current_timestamp on update current_timestamp,
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE cards_labels (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  card_id INT UNSIGNED NOT NULL,
+  label_id INT UNSIGNED NOT NULL,
+  created_at datetime default current_timestamp,
+  updated_at datetime default current_timestamp on update current_timestamp,
+  PRIMARY KEY (id),
+  UNIQUE uq_cards_labels_card_id_label_id(card_id, label_id),
+  CONSTRAINT fk_cards_labels_card_id
+    FOREIGN KEY (card_id)
+    REFERENCES cards(id),
+  CONSTRAINT fk_cards_labels_label_id
+    FOREIGN KEY (label_id)
+    REFERENCES labels(id)
+);

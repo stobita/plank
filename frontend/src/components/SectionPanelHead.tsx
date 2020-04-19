@@ -136,7 +136,7 @@ const MoreIcon = styled(MoreIconImage)`
 
 const FormArea = styled.div<{ active: boolean }>`
   transition: 0.5s;
-  max-height: ${(props) => (props.active ? 180 : 0)}px;
+  /** max-height: ${(props) => (props.active ? 180 : 0)}px; */
   overflow: hidden;
 `;
 

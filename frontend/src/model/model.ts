@@ -30,6 +30,12 @@ export type Card = {
   description: string;
   section: Section;
   position?: number;
+  labels: Label[];
+};
+
+export type Label = {
+  id: number;
+  name: string;
 };
 
 export const cardInit: Card = {
@@ -37,4 +43,5 @@ export const cardInit: Card = {
   name: "",
   description: "",
   section: sectionInit,
+  labels: [],
 };

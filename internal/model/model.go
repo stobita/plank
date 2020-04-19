@@ -20,4 +20,10 @@ type Card struct {
 	Position    uint
 	Description string
 	Section     *Section
+	Labels      []*Label
+}
+
+type Label struct {
+	ID   uint
+	Name string
 }

@@ -48,6 +48,25 @@ func (r *repository) GetAllBoards() ([]*model.Board, error) {
 	return m, nil
 }
 
+func (r *repository) GetLabels() ([]*model.Label, error) {
+	ctx := context.Background()
+	rows, err := rdb.Labels().All(ctx, r.db)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	m := make([]*model.Label, len(rows))
+	for i, v := range rows {
+		m[i] = &model.Label{
+			ID:   v.ID,
+			Name: v.Name,
+		}
+	}
+	return m, nil
+}
+
 func (r *repository) SaveNewBoard(m *model.Board) error {
 	ctx := context.Background()
 	row := rdb.Board{
@@ -108,6 +127,13 @@ func (r *repository) GetBoardSectionsWithCards(board *model.Board) ([]*model.Sec
 				rdb.CardRels.SectionsCardsPosition,
 			),
 		),
+		qm.Load(
+			qm.Rels(
+				rdb.SectionRels.Cards,
+				rdb.CardRels.CardsLabels,
+				rdb.CardsLabelRels.Label,
+			),
+		),
 		qm.Load(rdb.SectionRels.Board),
 	).All(ctx, r.db)
 	if err != nil {
@@ -117,11 +143,19 @@ func (r *repository) GetBoardSectionsWithCards(board *model.Board) ([]*model.Sec
 	for _, row := range rows {
 		var cards []*model.Card
 		for _, card := range row.R.Cards {
+			labels := make([]*model.Label, len(card.R.CardsLabels))
+			for i, v := range card.R.CardsLabels {
+				labels[i] = &model.Label{
+					ID:   v.ID,
+					Name: v.R.Label.Name,
+				}
+			}
 			cards = append(cards, &model.Card{
 				ID:          card.ID,
 				Name:        card.Name,
 				Description: card.Description,
 				Position:    card.R.SectionsCardsPosition.Position,
+				Labels:      labels,
 			})
 		}
 		sort.Slice(cards, func(i, j int) bool {
@@ -221,6 +255,18 @@ func (r *repository) SaveNewCard(m *model.Card) error {
 		return err
 	}
 
+	rels := make([]*rdb.CardsLabel, len(m.Labels))
+	for i, v := range m.Labels {
+		value := &rdb.CardsLabel{
+			LabelID: v.ID,
+		}
+		rels[i] = value
+	}
+	if err := row.AddCardsLabels(ctx, tx, true, rels...); err != nil {
+		tx.Rollback()
+		return errors.Wrap(err, "link.AddLinksTags error")
+	}
+
 	tx.Commit()
 
 	return nil
@@ -231,6 +277,12 @@ func (r *repository) GetCard(id uint) (*model.Card, error) {
 	row, err := rdb.Cards(
 		rdb.CardWhere.ID.EQ(id),
 		qm.Load(rdb.CardRels.Section),
+		qm.Load(
+			qm.Rels(
+				rdb.CardRels.CardsLabels,
+				rdb.CardsLabelRels.Label,
+			),
+		),
 	).One(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -247,9 +299,20 @@ func (r *repository) GetCard(id uint) (*model.Card, error) {
 
 func (r *repository) SaveCard(m *model.Card) error {
 	ctx := context.Background()
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 	row, err := rdb.Cards(
 		rdb.CardWhere.ID.EQ(m.ID),
-	).One(ctx, r.db)
+		qm.Load(
+			qm.Rels(
+				rdb.CardRels.CardsLabels,
+				rdb.CardsLabelRels.Label,
+			),
+		),
+	).One(ctx, tx)
 	if err != nil {
 		return err
 	}
@@ -257,12 +320,68 @@ func (r *repository) SaveCard(m *model.Card) error {
 	row.Name = m.Name
 	row.Description = m.Description
 
-	if _, err := row.Update(ctx, r.db, boil.Whitelist(
+	if _, err := row.Update(ctx, tx, boil.Whitelist(
 		rdb.CardColumns.Name,
 		rdb.CardColumns.Description,
 	)); err != nil {
 		return err
 	}
+
+	beforeLabels := make([]string, len(row.R.CardsLabels))
+	for i, v := range row.R.CardsLabels {
+		beforeLabels[i] = v.R.Label.Name
+	}
+	log.Println("beforeLabels: ", beforeLabels)
+	afterLabels := make([]string, len(m.Labels))
+	for i, v := range m.Labels {
+		afterLabels[i] = v.Name
+	}
+	log.Println("afterLabels: ", afterLabels)
+
+	labelDiff := stringArrayDiff(beforeLabels, afterLabels)
+
+	addLabelIDs := []interface{}{}
+	for _, v := range labelDiff.Inc {
+		for _, vv := range m.Labels {
+			if v == vv.Name {
+				addLabelIDs = append(addLabelIDs, vv.ID)
+			}
+		}
+	}
+	log.Println("addLabelIDs: ", addLabelIDs)
+	removeLabelIDs := []interface{}{}
+	for _, v := range labelDiff.Dec {
+		for _, vv := range row.R.CardsLabels {
+			if v == vv.R.Label.Name {
+				removeLabelIDs = append(removeLabelIDs, vv.R.Label.ID)
+			}
+		}
+	}
+	log.Println("removeLabelIDs: ", removeLabelIDs)
+
+	if len(addLabelIDs) > 0 {
+		rels := []*rdb.CardsLabel{}
+		for _, v := range addLabelIDs {
+			i := &rdb.CardsLabel{
+				LabelID: v.(uint),
+			}
+			rels = append(rels, i)
+		}
+		if err := row.AddCardsLabels(ctx, tx, true, rels...); err != nil {
+			return err
+		}
+	}
+
+	if len(removeLabelIDs) > 0 {
+		if _, err := row.CardsLabels(
+			qm.WhereIn("label_id in ?", removeLabelIDs...),
+		).DeleteAll(ctx, tx); err != nil {
+			return err
+		}
+	}
+
+	tx.Commit()
+
 	return nil
 }
 
@@ -470,19 +589,33 @@ func (r *repository) ReorderCardPosition(id uint, position uint) error {
 
 func (r *repository) DeleteCard(m *model.Card) error {
 	ctx := context.Background()
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 	row, err := rdb.Cards(
 		rdb.CardWhere.ID.EQ(m.ID),
 		qm.Load(rdb.CardRels.SectionsCardsPosition),
-	).One(ctx, r.db)
+		qm.Load(rdb.CardRels.CardsLabels),
+	).One(ctx, tx)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
-	if _, err := row.R.SectionsCardsPosition.Delete(ctx, r.db); err != nil {
+	if _, err := row.R.SectionsCardsPosition.Delete(ctx, tx); err != nil {
+		tx.Rollback()
 		return err
 	}
-	if _, err := row.Delete(ctx, r.db); err != nil {
+	if _, err := row.R.CardsLabels.DeleteAll(ctx, tx); err != nil {
+		tx.Rollback()
 		return err
 	}
+	if _, err := row.Delete(ctx, tx); err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
 	return nil
 }
 
@@ -536,14 +669,18 @@ func (r *repository) DeleteSection(m *model.Section) error {
 
 func (r *repository) SaveBoard(m *model.Board) error {
 	ctx := context.Background()
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
 	row, err := rdb.Boards(
 		rdb.BoardWhere.ID.EQ(m.ID),
-	).One(ctx, r.db)
+	).One(ctx, tx)
 	if err != nil {
 		return err
 	}
 	row.Name = m.Name
-	if _, err := row.Update(ctx, r.db, boil.Whitelist(
+	if _, err := row.Update(ctx, tx, boil.Whitelist(
 		rdb.BoardColumns.Name,
 	)); err != nil {
 		return err
@@ -597,4 +734,65 @@ func (r *repository) DeleteBoard(m *model.Board) error {
 	}
 	tx.Commit()
 	return nil
+}
+
+func (r *repository) SaveNewLabel(m *model.Label) error {
+	ctx := context.Background()
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	row := rdb.Label{
+		Name: m.Name,
+	}
+	if err := row.Insert(ctx, tx, boil.Whitelist(
+		rdb.LabelColumns.Name,
+	)); err != nil {
+		tx.Rollback()
+		return err
+	}
+	m.ID = row.ID
+	tx.Commit()
+	return nil
+}
+
+func (r *repository) GetLabelByName(name string) (*model.Label, error) {
+	ctx := context.Background()
+	label, err := rdb.Labels(
+		rdb.LabelWhere.Name.EQ(name),
+	).One(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Label{
+		ID:   label.ID,
+		Name: label.Name,
+	}, nil
+}
+
+type stringDiff struct {
+	Inc []string
+	Dec []string
+}
+
+func stringArrayDiff(before []string, after []string) stringDiff {
+	return stringDiff{
+		Inc: stringArraySub(after, before),
+		Dec: stringArraySub(before, after),
+	}
+}
+
+func stringArraySub(a []string, b []string) []string {
+	r := []string{}
+	m := make(map[string]bool)
+	for _, v := range b {
+		m[v] = true
+	}
+	for _, v := range a {
+		if _, ok := m[v]; !ok {
+			r = append(r, v)
+		}
+	}
+	return r
 }
