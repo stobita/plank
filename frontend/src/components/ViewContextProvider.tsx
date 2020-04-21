@@ -17,6 +17,7 @@ export const ViewContextProvider = (props: Props) => {
   const [createBoardActive, setCreateBoardActive] = useState(false);
   const [boardSettingActive, setBoardSettingActive] = useState(false);
   const [createSectionActive, setCreateSectionActive] = useState(false);
+  const [sectionFilterActive, setSectionFilterActive] = useState(false);
 
   useEffect(() => {
     localStorageRepository.setThemeName(themeName);
@@ -52,7 +53,9 @@ export const ViewContextProvider = (props: Props) => {
           boardSettingActive,
           setBoardSettingActive,
           createSectionActive,
-          setCreateSectionActive
+          setCreateSectionActive,
+          sectionFilterActive,
+          setSectionFilterActive,
         }}
       >
         <GlobalStyleWrapper />

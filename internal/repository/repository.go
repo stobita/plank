@@ -146,7 +146,7 @@ func (r *repository) GetBoardSectionsWithCards(board *model.Board) ([]*model.Sec
 			labels := make([]*model.Label, len(card.R.CardsLabels))
 			for i, v := range card.R.CardsLabels {
 				labels[i] = &model.Label{
-					ID:   v.ID,
+					ID:   v.R.Label.ID,
 					Name: v.R.Label.Name,
 				}
 			}
@@ -761,6 +761,20 @@ func (r *repository) GetLabelByName(name string) (*model.Label, error) {
 	ctx := context.Background()
 	label, err := rdb.Labels(
 		rdb.LabelWhere.Name.EQ(name),
+	).One(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Label{
+		ID:   label.ID,
+		Name: label.Name,
+	}, nil
+}
+
+func (r *repository) GetLabel(id uint) (*model.Label, error) {
+	ctx := context.Background()
+	label, err := rdb.Labels(
+		rdb.LabelWhere.ID.EQ(id),
 	).One(ctx, r.db)
 	if err != nil {
 		return nil, err

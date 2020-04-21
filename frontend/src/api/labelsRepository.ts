@@ -1,5 +1,5 @@
 import repository, { Collection } from "./repository";
-import { Label } from "../model/model";
+import { Label, Section } from "../model/model";
 
 const resource = "/labels";
 

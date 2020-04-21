@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import styled from "styled-components";
 import { BoardList } from "./BoardList";
 import { ReactComponent as SettingIconImage } from "../assets/setting.svg";
@@ -6,8 +6,9 @@ import { Setting } from "./Setting";
 
 export const Sidebar = () => {
   const [settingActive, setSettingActive] = useState(false);
+
   const handleOnClickSetting = () => {
-    setSettingActive(prev => !prev);
+    setSettingActive((prev) => !prev);
   };
   return (
     <Wrapper>
@@ -28,11 +29,11 @@ export const Sidebar = () => {
 };
 
 const Wrapper = styled.div`
-  background: ${props => props.theme.main};
+  background: ${(props) => props.theme.main};
   display: flex;
   flex-direction: column;
   flex: 1;
-  border-right: 1px solid ${props => props.theme.border};
+  border-right: 1px solid ${(props) => props.theme.border};
 `;
 
 const Top = styled.div`
@@ -54,16 +55,17 @@ const Bottom = styled.div`
 `;
 
 const Title = styled.h1`
-  color: ${props => props.theme.solid};
+  color: ${(props) => props.theme.solid};
   margin: 0;
 `;
 
 const Icon = styled.div`
   display: flex;
+  justify-content: space-between;
 `;
 
 const SettingIcon = styled(SettingIconImage)`
   cursor: pointer;
-  fill: ${props => props.theme.solid};
+  fill: ${(props) => props.theme.solid};
   height: 36px;
 `;

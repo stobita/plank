@@ -9,6 +9,7 @@ type InputPort interface {
 	CreateSection(CreateSectionInput) (*model.Section, error)
 	CreateCard(CreateCardInput) (*model.Card, error)
 	GetBoardSections(boardID uint) ([]*model.Section, error)
+	GetLabelSections(boardID uint, labelID uint) ([]*model.Section, error)
 
 	AddEventClient(EventClient)
 	RemoveEventClient(EventClient)
@@ -58,6 +59,7 @@ type Repository interface {
 	SaveNewCard(*model.Card) error
 
 	GetLabels() ([]*model.Label, error)
+	GetLabel(id uint) (*model.Label, error)
 }
 
 type eventBroker interface {

@@ -4,6 +4,7 @@ import { Board, Section } from "../model/model";
 const resource = "/boards";
 const childResouce = {
   sections: "sections",
+  rabels: "labels",
 };
 
 export type CreateBoardPayload = {
@@ -54,6 +55,20 @@ export default {
     const res = await repository
       .get<Collection<Section>>(
         `${resource}/${boardId}/${childResouce.sections}`
+      )
+      .catch((e) => {
+        console.error(e);
+        return null;
+      });
+    if (res === null || !res.data.items) {
+      return [];
+    }
+    return res.data.items;
+  },
+  async getLabelSections(boardId: number, labelId: number): Promise<Section[]> {
+    const res = await repository
+      .get<Collection<Section>>(
+        `${resource}/${boardId}/${childResouce.rabels}/${labelId}/${childResouce.sections}`
       )
       .catch((e) => {
         console.error(e);

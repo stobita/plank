@@ -17,6 +17,9 @@ type ViewContextProps = {
 
   currentBoard: Board;
   setCurrentBoard: Dispatch<SetStateAction<Board>>;
+
+  sectionFilterActive: boolean;
+  setSectionFilterActive: Dispatch<SetStateAction<boolean>>;
 };
 
 const defaultProps = {
@@ -33,7 +36,10 @@ const defaultProps = {
   setCreateSectionActive: () => {},
 
   currentBoard: { id: 0, name: "" },
-  setCurrentBoard: () => {}
+  setCurrentBoard: () => {},
+
+  sectionFilterActive: false,
+  setSectionFilterActive: () => {},
 };
 
 export const ViewContext = createContext<ViewContextProps>(defaultProps);

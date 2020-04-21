@@ -9,6 +9,7 @@ import { BoardView } from "./BoardView";
 import { EventContext } from "../context/eventContext";
 import { BoardSetting } from "./BoardSetting";
 import { HomeInterrupt } from "./HomeInterrupt";
+import { SectionFilter } from "./SectionFilter";
 
 export const Home = () => {
   const {
@@ -18,6 +19,7 @@ export const Home = () => {
     currentBoard,
     setCurrentBoard,
     boardSettingActive,
+    sectionFilterActive,
   } = useContext(ViewContext);
   const { updatedBoardIds, setUpdatedBoardIds } = useContext(EventContext);
   const { boards } = useContext(DataContext);
@@ -49,6 +51,7 @@ export const Home = () => {
           <Header />
         </Head>
         <Main>
+          {sectionFilterActive && <SectionFilter></SectionFilter>}
           <BoardView />
         </Main>
         {createBoardActive && (
@@ -98,7 +101,6 @@ const Head = styled.div`
 const Main = styled.div`
   display: flex;
   justify-content: center;
-  padding: 16px;
   flex: 1;
   background: ${(props) => props.theme.bg};
   margin-top: 56px;

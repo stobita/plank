@@ -152,6 +152,35 @@ func (c *Controller) PostBoardsSectionsCards() gin.HandlerFunc {
 	}
 }
 
+func (c *Controller) GetLabelSections() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		labelID, err := strconv.Atoi(ctx.Param("labelID"))
+		if err != nil {
+			log.Print(err)
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
+			return
+		}
+		boardID, err := strconv.Atoi(ctx.Param("boardID"))
+		if err != nil {
+			log.Print(err)
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
+			return
+		}
+		sections, err := c.inputPort.GetLabelSections(uint(boardID), uint(labelID))
+		if err != nil {
+			log.Println(err)
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+			return
+		}
+		res, err := presenter.GetSectionsResponse(sections)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+			return
+		}
+		ctx.JSON(http.StatusOK, res)
+	}
+}
+
 func (c *Controller) GetBoardsSections() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		boardID, err := strconv.Atoi(ctx.Param("boardID"))

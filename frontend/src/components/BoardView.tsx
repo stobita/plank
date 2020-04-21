@@ -176,6 +176,7 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1;
+  padding: 16px;
 `;
 
 const Main = styled.div`

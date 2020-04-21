@@ -30,6 +30,52 @@ func (u *usecase) GetBoardSections(boardID uint) ([]*model.Section, error) {
 	return sections, nil
 }
 
+func (u *usecase) GetLabelSections(boardID uint, labelID uint) ([]*model.Section, error) {
+	label, err := u.repository.GetLabel(labelID)
+	if err != nil {
+		return nil, err
+	}
+
+	if label == nil {
+		return nil, errors.New("label not found")
+	}
+	board, err := u.repository.GetBoard(boardID)
+	if err != nil {
+		return nil, err
+	}
+	if board == nil {
+		return nil, errors.New("board not found")
+	}
+	sections, err := u.repository.GetBoardSectionsWithCards(board)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*model.Section, len(sections))
+	for i, section := range sections {
+		cards := []*model.Card{}
+		for _, card := range section.Cards {
+			hasLabel := false
+			for _, _label := range card.Labels {
+				if _label.ID == label.ID {
+					hasLabel = true
+				}
+			}
+			if hasLabel {
+				c := new(model.Card)
+				c = card
+				cards = append(cards, c)
+			}
+		}
+		s := new(model.Section)
+		s = section
+		s.Cards = cards
+		result[i] = s
+	}
+
+	return sections, nil
+}
+
 func (u *usecase) CreateSection(input CreateSectionInput) (*model.Section, error) {
 	board, err := u.repository.GetBoard(input.BoardID)
 	if err != nil {
