@@ -83,9 +83,13 @@ CREATE TABLE boards_sections_positions (
 CREATE TABLE labels (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   name TEXT NOT NULL,
+  board_id INT UNSIGNED NOT NULL,
   created_at datetime default current_timestamp,
   updated_at datetime default current_timestamp on update current_timestamp,
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  CONSTRAINT fk_labels_board_id
+    FOREIGN KEY (board_id)
+    REFERENCES boards(id)
 );
 
 CREATE TABLE cards_labels (

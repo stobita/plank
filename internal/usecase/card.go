@@ -40,7 +40,10 @@ func (u *usecase) CreateCard(input CreateCardInput) (*model.Card, error) {
 			return nil, err
 		}
 		if label == nil {
-			label = &model.Label{Name: v}
+			label = &model.Label{
+				Name:    v,
+				BoardID: section.Board.ID,
+			}
 			if err := u.repository.SaveNewLabel(label); err != nil {
 				return nil, err
 			}
@@ -76,7 +79,10 @@ func (u *usecase) UpdateCard(id int, input UpdateCardInput) (*model.Card, error)
 			return nil, err
 		}
 		if label == nil {
-			label = &model.Label{Name: v}
+			label = &model.Label{
+				Name:    v,
+				BoardID: card.Section.Board.ID,
+			}
 			if err := u.repository.SaveNewLabel(label); err != nil {
 				return nil, err
 			}

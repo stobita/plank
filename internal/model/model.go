@@ -24,6 +24,7 @@ type Card struct {
 }
 
 type Label struct {
-	ID   uint
-	Name string
+	ID      uint
+	Name    string
+	BoardID uint
 }

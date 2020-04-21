@@ -48,9 +48,11 @@ func (r *repository) GetAllBoards() ([]*model.Board, error) {
 	return m, nil
 }
 
-func (r *repository) GetLabels() ([]*model.Label, error) {
+func (r *repository) GetBoardLabels(boardID uint) ([]*model.Label, error) {
 	ctx := context.Background()
-	rows, err := rdb.Labels().All(ctx, r.db)
+	rows, err := rdb.Labels(
+		rdb.LabelWhere.BoardID.EQ(boardID),
+	).All(ctx, r.db)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -744,10 +746,12 @@ func (r *repository) SaveNewLabel(m *model.Label) error {
 		return err
 	}
 	row := rdb.Label{
-		Name: m.Name,
+		Name:    m.Name,
+		BoardID: m.BoardID,
 	}
 	if err := row.Insert(ctx, tx, boil.Whitelist(
 		rdb.LabelColumns.Name,
+		rdb.LabelColumns.BoardID,
 	)); err != nil {
 		tx.Rollback()
 		return err

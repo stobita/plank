@@ -1,5 +1,5 @@
 import repository, { Collection } from "./repository";
-import { Board, Section } from "../model/model";
+import { Board, Section, Label } from "../model/model";
 
 const resource = "/boards";
 const childResouce = {
@@ -117,5 +117,17 @@ export default {
         position,
       }
     );
+  },
+  async getLabels(boardId: number): Promise<Label[]> {
+    const res = await repository
+      .get<Collection<Label>>(`${resource}/${boardId}/${childResouce.rabels}`)
+      .catch((e) => {
+        console.log(e);
+        return null;
+      });
+    if (res == null || !res.data.items) {
+      return [];
+    }
+    return res.data.items;
   },
 };

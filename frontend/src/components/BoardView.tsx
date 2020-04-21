@@ -16,7 +16,7 @@ import { DataContext } from "../context/dataContext";
 import sectionsRepository from "../api/sectionsRepository";
 
 export const BoardView = () => {
-  const { sections, setSections } = useContext(DataContext);
+  const { sections, setSections, setLabels } = useContext(DataContext);
   const { currentBoard } = useContext(ViewContext);
   const { updatedBoardIds } = useContext(EventContext);
 
@@ -35,6 +35,12 @@ export const BoardView = () => {
       });
     }
   }, [currentBoard.id, setSections]);
+
+  useEffect(() => {
+    boardsRepository.getLabels(currentBoard.id).then((items) => {
+      setLabels(items);
+    });
+  }, [currentBoard.id, sections]);
 
   const reorderCard = async (
     section: Section,

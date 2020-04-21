@@ -51,13 +51,14 @@ func getEngine(controller *controller.Controller) (*gin.Engine, error) {
 		v1.PUT("/boards/:boardID/sections/:sectionID/reorder", controller.ReorderSection())
 		v1.GET("/boards/:boardID/labels/:labelID/sections", controller.GetLabelSections())
 
+		v1.GET("/boards/:boardID/labels", controller.GetBoardLabels())
+
 		v1.POST("/sections/:sectionID/cards", controller.PostBoardsSectionsCards())
 		v1.PUT("/sections/:sectionID/cards/:cardID", controller.PutBoardsSectionsCards())
 		v1.PUT("/sections/:sectionID/cards/:cardID/reorder", controller.ReorderCard())
 		v1.PUT("/sections/:sectionID/cards/:cardID/move", controller.MoveCard())
 		v1.DELETE("/sections/:sectionID/cards/:cardID", controller.DeleteBoardsSectionsCards())
 
-		v1.GET("/labels", controller.GetLabels())
 	}
 	return r, nil
 }

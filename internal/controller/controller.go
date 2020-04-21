@@ -40,9 +40,15 @@ func (c *Controller) GetBoards() gin.HandlerFunc {
 	}
 }
 
-func (c *Controller) GetLabels() gin.HandlerFunc {
+func (c *Controller) GetBoardLabels() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		labels, err := c.inputPort.GetLabels()
+		boardID, err := strconv.Atoi(ctx.Param("boardID"))
+		if err != nil {
+			log.Print(err)
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params boardId"})
+			return
+		}
+		labels, err := c.inputPort.GetBoardLabels(uint(boardID))
 		if err != nil {
 			log.Println(err)
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})

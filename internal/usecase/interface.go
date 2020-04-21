@@ -28,7 +28,7 @@ type InputPort interface {
 	DeleteSection(id int) error
 	ReorderSectionPosition(id uint, position uint) error
 
-	GetLabels() ([]*model.Label, error)
+	GetBoardLabels(boardID uint) ([]*model.Label, error)
 }
 
 // Repository ...
@@ -58,7 +58,7 @@ type Repository interface {
 
 	SaveNewCard(*model.Card) error
 
-	GetLabels() ([]*model.Label, error)
+	GetBoardLabels(boardID uint) ([]*model.Label, error)
 	GetLabel(id uint) (*model.Label, error)
 }
 
