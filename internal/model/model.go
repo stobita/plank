@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 type Board struct {
 	ID       uint
 	Name     string
@@ -21,6 +23,7 @@ type Card struct {
 	Description string
 	Section     *Section
 	Labels      []*Label
+	LimitTime   *time.Time
 }
 
 type Label struct {

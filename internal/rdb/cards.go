@@ -28,6 +28,7 @@ type Card struct {
 	Name        string    `boil:"name" json:"name" toml:"name" yaml:"name"`
 	Description string    `boil:"description" json:"description" toml:"description" yaml:"description"`
 	SectionID   uint      `boil:"section_id" json:"section_id" toml:"section_id" yaml:"section_id"`
+	LimitTime   null.Time `boil:"limit_time" json:"limit_time,omitempty" toml:"limit_time" yaml:"limit_time,omitempty"`
 	CreatedAt   null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
 	UpdatedAt   null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
@@ -40,6 +41,7 @@ var CardColumns = struct {
 	Name        string
 	Description string
 	SectionID   string
+	LimitTime   string
 	CreatedAt   string
 	UpdatedAt   string
 }{
@@ -47,6 +49,7 @@ var CardColumns = struct {
 	Name:        "name",
 	Description: "description",
 	SectionID:   "section_id",
+	LimitTime:   "limit_time",
 	CreatedAt:   "created_at",
 	UpdatedAt:   "updated_at",
 }
@@ -58,6 +61,7 @@ var CardWhere = struct {
 	Name        whereHelperstring
 	Description whereHelperstring
 	SectionID   whereHelperuint
+	LimitTime   whereHelpernull_Time
 	CreatedAt   whereHelpernull_Time
 	UpdatedAt   whereHelpernull_Time
 }{
@@ -65,6 +69,7 @@ var CardWhere = struct {
 	Name:        whereHelperstring{field: "`cards`.`name`"},
 	Description: whereHelperstring{field: "`cards`.`description`"},
 	SectionID:   whereHelperuint{field: "`cards`.`section_id`"},
+	LimitTime:   whereHelpernull_Time{field: "`cards`.`limit_time`"},
 	CreatedAt:   whereHelpernull_Time{field: "`cards`.`created_at`"},
 	UpdatedAt:   whereHelpernull_Time{field: "`cards`.`updated_at`"},
 }
@@ -96,8 +101,8 @@ func (*cardR) NewStruct() *cardR {
 type cardL struct{}
 
 var (
-	cardAllColumns            = []string{"id", "name", "description", "section_id", "created_at", "updated_at"}
-	cardColumnsWithoutDefault = []string{"name", "description", "section_id"}
+	cardAllColumns            = []string{"id", "name", "description", "section_id", "limit_time", "created_at", "updated_at"}
+	cardColumnsWithoutDefault = []string{"name", "description", "section_id", "limit_time"}
 	cardColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	cardPrimaryKeyColumns     = []string{"id"}
 )

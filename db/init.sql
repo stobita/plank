@@ -35,6 +35,7 @@ CREATE TABLE cards (
   name text NOT NULL,
   description text NOT NULL,
   section_id INT UNSIGNED NOT NULL,
+  limit_time datetime default NULL,
   created_at datetime default current_timestamp,
   updated_at datetime default current_timestamp on update current_timestamp,
   PRIMARY KEY (id),

@@ -10,6 +10,7 @@ export type CreateCardPayload = {
   name: string;
   description: string;
   labels: string[];
+  limitTime?: number;
 };
 
 export type MoveCardPayload = {

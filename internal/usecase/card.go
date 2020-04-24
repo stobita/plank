@@ -3,6 +3,7 @@ package usecase
 import (
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/stobita/plank/internal/model"
 )
@@ -12,12 +13,14 @@ type CreateCardInput struct {
 	Description string
 	SectionID   uint
 	Labels      []string
+	LimitTime   *time.Time
 }
 
 type UpdateCardInput struct {
 	Name        string
 	Description string
 	Labels      []string
+	LimitTime   *time.Time
 }
 
 type ReorderCardPositionInput struct {
@@ -56,6 +59,7 @@ func (u *usecase) CreateCard(input CreateCardInput) (*model.Card, error) {
 		Description: input.Description,
 		Section:     section,
 		Labels:      labels,
+		LimitTime:   input.LimitTime,
 	}
 
 	if err := u.repository.SaveNewCard(m); err != nil {
@@ -70,8 +74,11 @@ func (u *usecase) UpdateCard(id int, input UpdateCardInput) (*model.Card, error)
 	if err != nil {
 		return nil, err
 	}
+
 	card.Name = input.Name
 	card.Description = input.Description
+	card.LimitTime = input.LimitTime
+
 	labels := make([]*model.Label, len(input.Labels))
 	for i, v := range input.Labels {
 		label, err := u.repository.GetLabelByName(v)

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stobita/plank/internal/event"
@@ -136,11 +137,13 @@ func (c *Controller) PostBoardsSectionsCards() gin.HandlerFunc {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
 			return
 		}
+		limitTime := time.Unix(int64(reqBody.LimitTime), 0)
 		input := usecase.CreateCardInput{
 			Name:        reqBody.Name,
 			Description: reqBody.Description,
 			SectionID:   uint(sectionID),
 			Labels:      reqBody.Labels,
+			LimitTime:   &limitTime,
 		}
 		result, err := c.inputPort.CreateCard(input)
 		if err != nil {
@@ -259,10 +262,12 @@ func (c *Controller) PutBoardsSectionsCards() gin.HandlerFunc {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
 			return
 		}
+		limitTime := time.Unix(int64(reqBody.LimitTime), 0)
 		input := usecase.UpdateCardInput{
 			Name:        reqBody.Name,
 			Description: reqBody.Description,
 			Labels:      reqBody.Labels,
+			LimitTime:   &limitTime,
 		}
 
 		result, err := c.inputPort.UpdateCard(cardID, input)

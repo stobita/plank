@@ -12,6 +12,8 @@ import { ViewContext } from "../context/viewContext";
 import { Textarea } from "./Textarea";
 import { DataContext } from "../context/dataContext";
 import { TagInput } from "./TagInput";
+import "react-datepicker/dist/react-datepicker.css";
+import { DatetimePicker } from "./DatetimePicker";
 
 interface Props {
   section: Section;
@@ -34,6 +36,7 @@ export const CreateCardForm = (props: Props) => {
     handleOnSubmit,
     initializeFormValue,
     onChangeLabel,
+    onChangeLimitDate,
   } = useForm<CreateCardPayload>(
     { name: "", description: "", labels: [] },
     createCard
@@ -49,6 +52,13 @@ export const CreateCardForm = (props: Props) => {
             type="text"
             placeholder="name"
           ></Input>
+        </Field>
+        <Field>
+          <DatetimePicker
+            value={formValue.limitTime}
+            onChange={onChangeLimitDate}
+            placeholder="limit date time"
+          ></DatetimePicker>
         </Field>
         <Field>
           <TagInput

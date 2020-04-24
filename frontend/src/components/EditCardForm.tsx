@@ -13,6 +13,7 @@ import { ViewContext } from "../context/viewContext";
 import { ButtonPair } from "./ButtonPair";
 import { DataContext } from "../context/dataContext";
 import { TagInput } from "./TagInput";
+import { DatetimePicker } from "./DatetimePicker";
 
 interface Props {
   item: Card;
@@ -34,6 +35,7 @@ export const EditCardForm = (props: Props) => {
     handleOnChangeInput,
     handleOnSubmit,
     onChangeLabel,
+    onChangeLimitDate,
   } = useForm<UpdateCardPayload>(
     {
       name: item.name,
@@ -56,6 +58,13 @@ export const EditCardForm = (props: Props) => {
             placeholder="name"
             onChange={handleOnChangeInput}
           ></Input>
+        </Field>
+        <Field>
+          <DatetimePicker
+            value={formValue.limitTime}
+            onChange={onChangeLimitDate}
+            placeholder="limit date time"
+          ></DatetimePicker>
         </Field>
         <Field>
           <TagInput

@@ -3,12 +3,14 @@ import styled from "styled-components";
 import { Card } from "../model/model";
 import { ReactComponent as DeleteIconImage } from "../assets/trash.svg";
 import { ReactComponent as EditIconImage } from "../assets/edit.svg";
+import { ReactComponent as TimeIconImage } from "../assets/time.svg";
 import { DeleteConfirmation } from "./DeleteConfirmation";
 import sectionsRepository from "../api/sectionsRepository";
 import { ViewContext } from "../context/viewContext";
 import boardsRepository from "../api/boardsRepository";
 import { EditCardForm } from "./EditCardForm";
 import { DataContext } from "../context/dataContext";
+import dayjs from "dayjs";
 
 interface Props {
   item: Card;
@@ -46,6 +48,11 @@ export const CardPanelDetail = (props: Props) => {
     setIsEdit(false);
   };
 
+  const displayTime = (): string => {
+    if (!item.limitTime) return "";
+    return dayjs.unix(item.limitTime).format("M/DD H:mm");
+  };
+
   return (
     <Wrapper>
       <Top>
@@ -66,11 +73,21 @@ export const CardPanelDetail = (props: Props) => {
                 <DeleteIcon onClick={handleOnClickDelete}></DeleteIcon>
               </Operator>
             </TopInnerTop>
-            <LabelList>
-              {item.labels.map((v) => (
-                <LabelItem>{v.name}</LabelItem>
-              ))}
-            </LabelList>
+            {item.labels.length > 0 || item.limitTime ? (
+              <TopInnerBottom>
+                <LabelList>
+                  {item.labels.map((v) => (
+                    <LabelItem key={v.id}>{v.name}</LabelItem>
+                  ))}
+                </LabelList>
+                {item.limitTime ? (
+                  <LimitTime>
+                    <TimeIcon></TimeIcon>
+                    {displayTime()}
+                  </LimitTime>
+                ) : null}
+              </TopInnerBottom>
+            ) : null}
           </TopInner>
         )}
       </Top>
@@ -105,19 +122,31 @@ const TopInner = styled.div`
 const TopInnerTop = styled.div`
   display: flex;
   justify-content: space-between;
+  align-items: center;
+`;
+
+const TopInnerBottom = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  align-items: center;
 `;
 
 const LabelList = styled.div`
   display: flex;
-  justify-content: flex-end;
-  margin-top: 8px;
+`;
+
+const LimitTime = styled.div`
+  font-weight: bold;
+  display: flex;
+  align-items: center;
 `;
 
 const LabelItem = styled.div`
   padding: 4px 8px;
   border-radius: 2px;
   border: 1px solid ${(props) => props.theme.border};
-  margin-left: 8px;
+  margin-right: 8px;
   background: ${(props) => props.theme.bg};
 `;
 
@@ -140,6 +169,13 @@ const Description = styled.p`
 
 const Operator = styled.div`
   display: flex;
+`;
+
+const TimeIcon = styled(TimeIconImage)`
+  fill: ${(props) => props.theme.solid};
+  height: 16px;
+  width: 16px;
+  margin-right: 4px;
 `;
 
 const DeleteIcon = styled(DeleteIconImage)`

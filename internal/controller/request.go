@@ -12,6 +12,7 @@ type postBoardsSectionsCardsRequestBody struct {
 	Name        string   `json:"name" binding:"required"`
 	Description string   `json:"description"`
 	Labels      []string `json:"labels"`
+	LimitTime   uint     `json:"limitTime"`
 }
 
 type reorderSectionRequestBody struct {

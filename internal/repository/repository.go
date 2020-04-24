@@ -11,6 +11,7 @@ import (
 	"github.com/stobita/plank/internal/model"
 	"github.com/stobita/plank/internal/rdb"
 	"github.com/stobita/plank/internal/usecase"
+	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries/qm"
 )
@@ -158,6 +159,7 @@ func (r *repository) GetBoardSectionsWithCards(board *model.Board) ([]*model.Sec
 				Description: card.Description,
 				Position:    card.R.SectionsCardsPosition.Position,
 				Labels:      labels,
+				LimitTime:   &card.LimitTime.Time,
 			})
 		}
 		sort.Slice(cards, func(i, j int) bool {
@@ -230,11 +232,13 @@ func (r *repository) SaveNewCard(m *model.Card) error {
 		Name:        m.Name,
 		Description: m.Description,
 		SectionID:   m.Section.ID,
+		LimitTime:   null.TimeFrom(*m.LimitTime),
 	}
 	if err := row.Insert(ctx, tx, boil.Whitelist(
 		rdb.CardColumns.Name,
 		rdb.CardColumns.Description,
 		rdb.CardColumns.SectionID,
+		rdb.CardColumns.LimitTime,
 	)); err != nil {
 		tx.Rollback()
 		return err
@@ -285,6 +289,12 @@ func (r *repository) GetCard(id uint) (*model.Card, error) {
 				rdb.CardsLabelRels.Label,
 			),
 		),
+		qm.Load(
+			qm.Rels(
+				rdb.CardRels.Section,
+				rdb.SectionRels.Board,
+			),
+		),
 	).One(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -295,6 +305,9 @@ func (r *repository) GetCard(id uint) (*model.Card, error) {
 		Description: row.Description,
 		Section: &model.Section{
 			ID: row.R.Section.ID,
+			Board: &model.Board{
+				ID: row.R.Section.BoardID,
+			},
 		},
 	}, nil
 }
@@ -321,10 +334,12 @@ func (r *repository) SaveCard(m *model.Card) error {
 
 	row.Name = m.Name
 	row.Description = m.Description
+	row.LimitTime = null.TimeFrom(*m.LimitTime)
 
 	if _, err := row.Update(ctx, tx, boil.Whitelist(
 		rdb.CardColumns.Name,
 		rdb.CardColumns.Description,
+		rdb.CardColumns.LimitTime,
 	)); err != nil {
 		return err
 	}

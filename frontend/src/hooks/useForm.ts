@@ -17,6 +17,10 @@ export const useForm = <P>(initFormValue: P, submitAction: () => void) => {
     setFormValue((prev) => ({ ...prev, labels: items }));
   }, []);
 
+  const onChangeLimitDate = (limitTime: number) => {
+    setFormValue((prev) => ({ ...prev, limitTime: limitTime }));
+  };
+
   const initializeFormValue = () => {
     setFormValue(initFormValue);
   };
@@ -26,5 +30,6 @@ export const useForm = <P>(initFormValue: P, submitAction: () => void) => {
     handleOnSubmit,
     initializeFormValue,
     onChangeLabel,
+    onChangeLimitDate,
   };
 };

@@ -31,6 +31,7 @@ export type Card = {
   section: Section;
   position?: number;
   labels: Label[];
+  limitTime?: number;
 };
 
 export type Label = {
