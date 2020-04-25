@@ -41,6 +41,7 @@ export const EditCardForm = (props: Props) => {
       name: item.name,
       description: item.description,
       labels: item.labels!.map((v) => v.name),
+      limitTime: item.limitTime,
     },
     updateCard
   );

@@ -15,11 +15,16 @@ type Props = {
 };
 
 export const DatetimePicker = (props: Props) => {
-  const [limitTimeActive, setLimitTimeActive] = useState(false);
+  const [limitTimeActive, setLimitTimeActive] = useState(!!props.value);
   const onChangeDate = (date: Date) => {
     const got = dayjs(date);
     const current = dayjs.unix(props.value || dayjs().unix());
-    const result = current.year(got.year()).month(got.month()).date(got.date());
+    const result = current
+      .year(got.year())
+      .month(got.month())
+      .date(got.date())
+      .hour(0)
+      .minute(0);
 
     props.onChange(result.unix());
   };
@@ -45,16 +50,12 @@ export const DatetimePicker = (props: Props) => {
     onClick?: () => void;
     onChange?: () => void;
   }) => {
-    return props.value ? (
+    return (
       <Input
         value={props.value}
         onFocus={props.onClick}
         onChange={props.onClick}
       ></Input>
-    ) : (
-      <Button type="button" onClick={props.onClick}>
-        add time
-      </Button>
     );
   };
 
@@ -78,7 +79,8 @@ export const DatetimePicker = (props: Props) => {
               showTimeSelect
               showTimeSelectOnly
               timeIntervals={15}
-              dateFormat="h:mm aa"
+              dateFormat="H:mm"
+              timeFormat="H:mm"
               customInput={<TimeButton />}
             ></DatePicker>
           </TimeWrapper>
