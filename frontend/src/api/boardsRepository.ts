@@ -1,10 +1,10 @@
-import repository, { Collection } from "./repository";
-import { Board, Section, Label } from "../model/model";
+import repository, { Collection } from './repository';
+import { Board, Section, Label } from '../model/model';
 
-const resource = "/boards";
+const resource = '/boards';
 const childResouce = {
-  sections: "sections",
-  rabels: "labels",
+  sections: 'sections',
+  rabels: 'labels',
 };
 
 export type CreateBoardPayload = {
@@ -42,7 +42,7 @@ export default {
   },
   async updateBoard(
     boardId: number,
-    payload: UpdateBoardPayload
+    payload: UpdateBoardPayload,
   ): Promise<Board> {
     const res = await repository.put(`${resource}/${boardId}`, payload);
     return res.data;
@@ -54,7 +54,21 @@ export default {
   async getBoardSections(boardId: number): Promise<Section[]> {
     const res = await repository
       .get<Collection<Section>>(
-        `${resource}/${boardId}/${childResouce.sections}`
+        `${resource}/${boardId}/${childResouce.sections}`,
+      )
+      .catch((e) => {
+        console.error(e);
+        return null;
+      });
+    if (res === null || !res.data.items) {
+      return [];
+    }
+    return res.data.items;
+  },
+  async searchBoardSections(boardId: number, word: string) {
+    const res = await repository
+      .get<Collection<Section>>(
+        `${resource}/${boardId}/${childResouce.sections}?word=${word}`,
       )
       .catch((e) => {
         console.error(e);
@@ -68,7 +82,7 @@ export default {
   async getLabelSections(boardId: number, labelId: number): Promise<Section[]> {
     const res = await repository
       .get<Collection<Section>>(
-        `${resource}/${boardId}/${childResouce.rabels}/${labelId}/${childResouce.sections}`
+        `${resource}/${boardId}/${childResouce.rabels}/${labelId}/${childResouce.sections}`,
       )
       .catch((e) => {
         console.error(e);
@@ -81,41 +95,41 @@ export default {
   },
   async createSection(
     boardId: number,
-    payload: CreateSectionPayload
+    payload: CreateSectionPayload,
   ): Promise<Section> {
     const res = await repository.post<Section>(
       `${resource}/${boardId}/${childResouce.sections}`,
-      payload
+      payload,
     );
     return res.data;
   },
   async updateSection(
     boardId: number,
     sectionId: number,
-    payload: UpdateSectionPayload
+    payload: UpdateSectionPayload,
   ): Promise<Section> {
     const res = await repository.put(
       `${resource}/${boardId}/${childResouce.sections}/${sectionId}`,
-      payload
+      payload,
     );
     return res.data;
   },
   async deleteSection(boardId: number, sectionId: number): Promise<void> {
     await repository.delete(
-      `${resource}/${boardId}/${childResouce.sections}/${sectionId}`
+      `${resource}/${boardId}/${childResouce.sections}/${sectionId}`,
     );
     return;
   },
   async reorderSection(
     boardId: number,
     sectionId: number,
-    position: number
+    position: number,
   ): Promise<void> {
     await repository.put(
       `${resource}/${boardId}/${childResouce.sections}/${sectionId}/reorder`,
       {
         position,
-      }
+      },
     );
   },
   async getLabels(boardId: number): Promise<Label[]> {

@@ -1,15 +1,15 @@
-import React, { useContext, useEffect } from "react";
-import styled from "styled-components";
-import { Header } from "./Header";
-import { Sidebar } from "./Sidebar";
-import { CreateBoardForm } from "./CreateBoardForm";
-import { ViewContext } from "../context/viewContext";
-import { DataContext } from "../context/dataContext";
-import { BoardView } from "./BoardView";
-import { EventContext } from "../context/eventContext";
-import { BoardSetting } from "./BoardSetting";
-import { HomeInterrupt } from "./HomeInterrupt";
-import { SectionFilter } from "./SectionFilter";
+import React, { useContext, useEffect } from 'react';
+import styled from 'styled-components';
+import { Header } from './Header';
+import { Sidebar } from './Sidebar';
+import { CreateBoardForm } from './CreateBoardForm';
+import { ViewContext } from '../context/viewContext';
+import { DataContext } from '../context/dataContext';
+import { BoardView } from './BoardView';
+import { EventContext } from '../context/eventContext';
+import { BoardSetting } from './BoardSetting';
+import { HomeInterrupt } from './HomeInterrupt';
+import { SectionFilter } from './SectionFilter';
 
 export const Home = () => {
   const {
@@ -94,7 +94,7 @@ const Body = styled.div`
 
 const Head = styled.div`
   position: fixed;
-  width: 100%;
+  width: calc(100vw - 240px);
   z-index: 1;
 `;
 

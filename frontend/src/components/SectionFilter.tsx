@@ -1,11 +1,9 @@
-import React, { useContext, useState } from "react";
-import styled from "styled-components";
-import { ReactComponent as CloseIconImage } from "../assets/close.svg";
-import { DataContext } from "../context/dataContext";
-import { ViewContext } from "../context/viewContext";
-import boardsRepository from "../api/boardsRepository";
-import { Label } from "../model/model";
-import sectionsRepository from "../api/sectionsRepository";
+import React, { useContext, useState } from 'react';
+import styled from 'styled-components';
+import { ReactComponent as CloseIconImage } from '../assets/close.svg';
+import { DataContext } from '../context/dataContext';
+import { ViewContext } from '../context/viewContext';
+import boardsRepository from '../api/boardsRepository';
 
 export const SectionFilter = () => {
   const { setSections, labels } = useContext(DataContext);
@@ -18,7 +16,7 @@ export const SectionFilter = () => {
   const handleOnClickLabel = async (labelId: number) => {
     const res = await boardsRepository.getLabelSections(
       currentBoard.id,
-      labelId
+      labelId,
     );
     setSections([]);
     setSections(res);
@@ -71,7 +69,7 @@ const CloseIcon = styled(CloseIconImage)`
 
 const List = styled.ul``;
 const Item = styled.li<{ selected: boolean }>`
-  font-weight: ${(props) => props.selected && "bold"};
+  font-weight: ${(props) => props.selected && 'bold'};
   padding: 4px;
   cursor: pointer;
 `;
