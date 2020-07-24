@@ -20,6 +20,7 @@ services:
       MYSQL_PORT: 3306
       MYSQL_SKIPSQLCMD: "true"
       MYSQL_SSLMODE: "false"
+      ES_URL: "http://elasticsearch:9200"
   db:
     image: mysql:5.7
     environment:
@@ -32,7 +33,22 @@ services:
       - plank_dev_data:/var/lib/mysql
     ports:
       - '3306:3306'
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.3.1
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+    volumes:
+      - plank_dev_es:/usr/share/elasticsearch/data
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.3.1
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
 volumes:
   plank_dev_data:
     driver: local
-
+  plank_dev_es:
+    driver: local

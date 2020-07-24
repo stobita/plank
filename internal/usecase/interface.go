@@ -10,6 +10,7 @@ type InputPort interface {
 	CreateCard(CreateCardInput) (*model.Card, error)
 	GetBoardSections(boardID uint) ([]*model.Section, error)
 	GetLabelSections(boardID uint, labelID uint) ([]*model.Section, error)
+	SearchBoardsSections(boardID uint, word string) ([]*model.Section, error)
 
 	AddEventClient(EventClient)
 	RemoveEventClient(EventClient)
@@ -49,6 +50,7 @@ type Repository interface {
 	ReorderSectionPosition(id uint, position uint) error
 
 	GetBoardSectionsWithCards(*model.Board) ([]*model.Section, error)
+	SearchBoardSectionsWithCards(*model.Board, string) ([]*model.Section, error)
 
 	GetCard(id uint) (*model.Card, error)
 	DeleteCard(*model.Card) error

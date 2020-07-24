@@ -30,6 +30,21 @@ func (u *usecase) GetBoardSections(boardID uint) ([]*model.Section, error) {
 	return sections, nil
 }
 
+func (u *usecase) SearchBoardsSections(boardID uint, word string) ([]*model.Section, error) {
+	board, err := u.repository.GetBoard(boardID)
+	if err != nil {
+		return nil, err
+	}
+	if board == nil {
+		return nil, errors.New("board not found")
+	}
+	sections, err := u.repository.SearchBoardSectionsWithCards(board, word)
+	if err != nil {
+		return nil, err
+	}
+	return sections, nil
+}
+
 func (u *usecase) GetLabelSections(boardID uint, labelID uint) ([]*model.Section, error) {
 	label, err := u.repository.GetLabel(labelID)
 	if err != nil {

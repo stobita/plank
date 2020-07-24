@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stobita/plank/internal/event"
+	"github.com/stobita/plank/internal/model"
 	"github.com/stobita/plank/internal/presenter"
 	"github.com/stobita/plank/internal/usecase"
 )
@@ -198,7 +199,15 @@ func (c *Controller) GetBoardsSections() gin.HandlerFunc {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
 			return
 		}
-		sections, err := c.inputPort.GetBoardSections(uint(boardID))
+		word := ctx.Query("word")
+		var sections []*model.Section
+		if word == "" {
+			sections, err = c.inputPort.GetBoardSections(uint(boardID))
+
+		} else {
+			sections, err = c.inputPort.SearchBoardsSections(uint(boardID), word)
+
+		}
 		if err != nil {
 			log.Print(err)
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})

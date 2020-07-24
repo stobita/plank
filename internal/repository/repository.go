@@ -6,7 +6,9 @@ import (
 	"log"
 	"os"
 	"sort"
+	"strconv"
 
+	"github.com/olivere/elastic/v7"
 	"github.com/pkg/errors"
 	"github.com/stobita/plank/internal/model"
 	"github.com/stobita/plank/internal/rdb"
@@ -17,16 +19,18 @@ import (
 )
 
 type repository struct {
-	db *sql.DB
+	db       *sql.DB
+	esClient *elastic.Client
 }
 
 // New ...
-func New(db *sql.DB) usecase.Repository {
+func New(db *sql.DB, esClient *elastic.Client) usecase.Repository {
 	if os.Getenv("PRODUCTION") != "true" {
 		boil.DebugMode = true
 	}
 	return &repository{
-		db: db,
+		db:       db,
+		esClient: esClient,
 	}
 }
 
@@ -118,30 +122,7 @@ func (r *repository) GetSection(id uint) (*model.Section, error) {
 	}, nil
 }
 
-func (r *repository) GetBoardSectionsWithCards(board *model.Board) ([]*model.Section, error) {
-	ctx := context.Background()
-	rows, err := rdb.Sections(
-		rdb.SectionWhere.BoardID.EQ(board.ID),
-		qm.Load(rdb.SectionRels.Cards),
-		qm.Load(rdb.SectionRels.BoardsSectionsPosition),
-		qm.Load(
-			qm.Rels(
-				rdb.SectionRels.Cards,
-				rdb.CardRels.SectionsCardsPosition,
-			),
-		),
-		qm.Load(
-			qm.Rels(
-				rdb.SectionRels.Cards,
-				rdb.CardRels.CardsLabels,
-				rdb.CardsLabelRels.Label,
-			),
-		),
-		qm.Load(rdb.SectionRels.Board),
-	).All(ctx, r.db)
-	if err != nil {
-		return nil, errors.Wrap(err, "repository: get All error")
-	}
+func (r *repository) convertSections(rows rdb.SectionSlice) ([]*model.Section, error) {
 	var sections []*model.Section
 	for _, row := range rows {
 		var cards []*model.Card
@@ -179,6 +160,91 @@ func (r *repository) GetBoardSectionsWithCards(board *model.Board) ([]*model.Sec
 		return sections[i].Position < sections[j].Position
 	})
 	return sections, nil
+}
+
+func (r *repository) GetBoardSectionsWithCards(board *model.Board) ([]*model.Section, error) {
+	ctx := context.Background()
+	rows, err := rdb.Sections(
+		rdb.SectionWhere.BoardID.EQ(board.ID),
+		qm.Load(rdb.SectionRels.Cards),
+		qm.Load(rdb.SectionRels.BoardsSectionsPosition),
+		qm.Load(
+			qm.Rels(
+				rdb.SectionRels.Cards,
+				rdb.CardRels.SectionsCardsPosition,
+			),
+		),
+		qm.Load(
+			qm.Rels(
+				rdb.SectionRels.Cards,
+				rdb.CardRels.CardsLabels,
+				rdb.CardsLabelRels.Label,
+			),
+		),
+		qm.Load(rdb.SectionRels.Board),
+	).All(ctx, r.db)
+	if err != nil {
+		return nil, errors.Wrap(err, "repository: get All error")
+	}
+	return r.convertSections(rows)
+}
+
+const cardIndex = "card"
+
+type cardDocument struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+func (r *repository) SearchBoardSectionsWithCards(board *model.Board, word string) ([]*model.Section, error) {
+	ctx := context.Background()
+	query := elastic.NewMultiMatchQuery(word, "name", "description")
+	result, err := r.esClient.Search().
+		Index(cardIndex).
+		Query(query).
+		Do(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var ids []interface{}
+	if result.Hits.TotalHits.Value > 0 {
+		for _, hit := range result.Hits.Hits {
+			id, err := strconv.Atoi(hit.Id)
+			if err != nil {
+				return nil, err
+			}
+			ids = append(ids, id)
+		}
+	}
+	if len(ids) < 1 {
+		return nil, errors.New("not match word")
+	}
+	rows, err := rdb.Sections(
+		rdb.SectionWhere.BoardID.EQ(board.ID),
+		qm.Load(
+			rdb.SectionRels.Cards,
+			qm.WhereIn("cards.id in ?", ids...),
+		),
+		qm.Load(rdb.SectionRels.BoardsSectionsPosition),
+		qm.Load(
+			qm.Rels(
+				rdb.SectionRels.Cards,
+				rdb.CardRels.SectionsCardsPosition,
+			),
+		),
+		qm.Load(
+			qm.Rels(
+				rdb.SectionRels.Cards,
+				rdb.CardRels.CardsLabels,
+				rdb.CardsLabelRels.Label,
+			),
+		),
+		qm.Load(rdb.SectionRels.Board),
+	).All(ctx, r.db)
+	if err != nil {
+		return nil, errors.Wrap(err, "repository: get All error")
+	}
+	return r.convertSections(rows)
 }
 
 func (r *repository) SaveNewSection(m *model.Section) error {
@@ -274,6 +340,16 @@ func (r *repository) SaveNewCard(m *model.Card) error {
 	}
 
 	tx.Commit()
+
+	doc := cardDocument{
+		Name:        m.Name,
+		Description: m.Description,
+	}
+	_, err = r.esClient.Index().Index(cardIndex).
+		Id(strconv.Itoa(int(m.ID))).BodyJson(doc).Do(ctx)
+	if err != nil {
+		return errors.Wrap(err, "create document error")
+	}
 
 	return nil
 }
@@ -398,6 +474,19 @@ func (r *repository) SaveCard(m *model.Card) error {
 	}
 
 	tx.Commit()
+
+	doc := cardDocument{
+		Name:        m.Name,
+		Description: m.Description,
+	}
+	_, err = r.esClient.Update().
+		Index(cardIndex).
+		Id(strconv.Itoa(int(m.ID))).
+		Doc(doc).
+		Do(ctx)
+	if err != nil {
+		return errors.Wrap(err, "update document error")
+	}
 
 	return nil
 }
@@ -681,6 +770,13 @@ func (r *repository) DeleteSection(m *model.Section) error {
 		return err
 	}
 	tx.Commit()
+	_, err = r.esClient.Delete().
+		Index(cardIndex).
+		Id(strconv.Itoa(int(m.ID))).
+		Do(ctx)
+	if err != nil {
+		return errors.Wrap(err, "update document error")
+	}
 	return nil
 }
 
