@@ -1,5 +1,5 @@
-import { createContext, Dispatch, SetStateAction } from "react";
-import { Board, Card, Section, Label } from "../model/model";
+import { createContext, Dispatch, SetStateAction } from 'react';
+import { Board, Section, Label } from '../model/model';
 
 type DataContextProps = {
   boards: Board[];

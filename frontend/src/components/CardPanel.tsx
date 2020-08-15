@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-import { CardPanelDetail } from "./CardPanelDetail";
-import { Card } from "../model/model";
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import { CardPanelDetail } from './CardPanelDetail';
+import { Card } from '../model/model';
 
 interface Props {
   card: Card;

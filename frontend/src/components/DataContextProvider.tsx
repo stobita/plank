@@ -1,6 +1,6 @@
-import React, { ReactNode, useState, useEffect } from "react";
-import { DataContext } from "../context/dataContext";
-import { Board, Section, Card, Label } from "../model/model";
+import React, { ReactNode, useState } from 'react';
+import { DataContext } from '../context/dataContext';
+import { Board, Section, Label } from '../model/model';
 
 interface Props {
   children: ReactNode;

@@ -1,12 +1,10 @@
-import React, { useState } from "react";
-import DatePicker from "react-datepicker";
-import { ReactComponent as CloseIconImage } from "../assets/close.svg";
-import { useForm } from "../hooks/useForm";
-import { CreateCardPayload } from "../api/sectionsRepository";
-import styled from "styled-components";
-import { Input } from "./Input";
-import { Button } from "./Button";
-import dayjs from "dayjs";
+import React, { useState } from 'react';
+import DatePicker from 'react-datepicker';
+import { ReactComponent as CloseIconImage } from '../assets/close.svg';
+import styled from 'styled-components';
+import { Input } from './Input';
+import { Button } from './Button';
+import dayjs from 'dayjs';
 
 type Props = {
   value: number | undefined;
@@ -112,7 +110,7 @@ const Wrapper = styled.div`
     color: ${(props) => props.theme.solid};
     border: 1px solid ${(props) => props.theme.border};
   }
-  .react-datepicker-popper[data-placement^="bottom"] {
+  .react-datepicker-popper[data-placement^='bottom'] {
     margin-top: 8px;
   }
   .react-datepicker__header {

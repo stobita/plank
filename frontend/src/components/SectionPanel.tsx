@@ -1,13 +1,9 @@
-import React from "react";
-import styled from "styled-components";
-import { CardList } from "./CardList";
-import { SectionPanelHead } from "./SectionPanelHead";
-import { Section } from "../model/model";
-import {
-  DroppableProvided,
-  Droppable,
-  DraggableProvided,
-} from "react-beautiful-dnd";
+import React from 'react';
+import styled from 'styled-components';
+import { CardList } from './CardList';
+import { SectionPanelHead } from './SectionPanelHead';
+import { Section } from '../model/model';
+import { Droppable, DraggableProvided } from 'react-beautiful-dnd';
 
 interface Props {
   section: Section;

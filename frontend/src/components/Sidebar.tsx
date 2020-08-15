@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, } from "react";
 import styled from "styled-components";
 import { BoardList } from "./BoardList";
 import { ReactComponent as SettingIconImage } from "../assets/setting.svg";
