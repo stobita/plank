@@ -5,7 +5,7 @@ export type Board = {
 
 export const boardInit = {
   id: 0,
-  name: "",
+  name: '',
 };
 
 export type Section = {
@@ -18,7 +18,7 @@ export type Section = {
 
 export const sectionInit: Section = {
   id: 0,
-  name: "",
+  name: '',
   board: boardInit,
   cards: [],
   position: 0,
@@ -32,6 +32,7 @@ export type Card = {
   position?: number;
   labels: Label[];
   limitTime?: number;
+  image?: string;
 };
 
 export type Label = {
@@ -41,8 +42,8 @@ export type Label = {
 
 export const cardInit: Card = {
   id: 0,
-  name: "",
-  description: "",
+  name: '',
+  description: '',
   section: sectionInit,
   labels: [],
 };

@@ -1,9 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback } from 'react';
 
 export const useForm = <P>(initFormValue: P, submitAction: () => void) => {
   const [formValue, setFormValue] = useState<P>(initFormValue);
   const handleOnChangeInput = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     e.persist();
     setFormValue((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -21,6 +21,10 @@ export const useForm = <P>(initFormValue: P, submitAction: () => void) => {
     setFormValue((prev) => ({ ...prev, limitTime: limitTime }));
   };
 
+  const onChangeImage = (image: string) => {
+    setFormValue((prev) => ({ ...prev, image }));
+  };
+
   const initializeFormValue = () => {
     setFormValue(initFormValue);
   };
@@ -31,5 +35,6 @@ export const useForm = <P>(initFormValue: P, submitAction: () => void) => {
     initializeFormValue,
     onChangeLabel,
     onChangeLimitDate,
+    onChangeImage,
   };
 };

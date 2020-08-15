@@ -1,19 +1,21 @@
-import React, { useContext } from "react";
-import styled from "styled-components";
-import { Input } from "./Input";
-import { Button } from "./Button";
-import boardsRepository from "../api/boardsRepository";
-import { useForm } from "../hooks/useForm";
+import React, { useContext } from 'react';
+import styled from 'styled-components';
+
+import { Input } from './Input';
+import { Button } from './Button';
+import boardsRepository from '../api/boardsRepository';
+import { useForm } from '../hooks/useForm';
 import sectionsRepository, {
   CreateCardPayload,
-} from "../api/sectionsRepository";
-import { Section } from "../model/model";
-import { ViewContext } from "../context/viewContext";
-import { Textarea } from "./Textarea";
-import { DataContext } from "../context/dataContext";
-import { TagInput } from "./TagInput";
-import "react-datepicker/dist/react-datepicker.css";
-import { DatetimePicker } from "./DatetimePicker";
+} from '../api/sectionsRepository';
+import { Section } from '../model/model';
+import { ViewContext } from '../context/viewContext';
+import { Textarea } from './Textarea';
+import { DataContext } from '../context/dataContext';
+import { TagInput } from './TagInput';
+import 'react-datepicker/dist/react-datepicker.css';
+import { DatetimePicker } from './DatetimePicker';
+import { ImageUploader } from './ImageUploader';
 
 interface Props {
   section: Section;
@@ -37,9 +39,10 @@ export const CreateCardForm = (props: Props) => {
     initializeFormValue,
     onChangeLabel,
     onChangeLimitDate,
+    onChangeImage,
   } = useForm<CreateCardPayload>(
-    { name: "", description: "", labels: [] },
-    createCard
+    { name: '', description: '', labels: [], image: '' },
+    createCard,
   );
   return (
     <Wrapper>
@@ -76,6 +79,12 @@ export const CreateCardForm = (props: Props) => {
             placeholder="description"
             onChange={handleOnChangeInput}
           />
+        </Field>
+        <Field>
+          <ImageUploader
+            image={formValue.image ? formValue.image : ''}
+            onChange={onChangeImage}
+          ></ImageUploader>
         </Field>
         <Field>
           <Button primary>Add</Button>

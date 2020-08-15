@@ -1,19 +1,21 @@
-import React, { useContext } from "react";
-import styled from "styled-components";
-import { Button } from "./Button";
-import { Input } from "./Input";
-import { Textarea } from "./Textarea";
+import React, { useContext, useCallback } from 'react';
+import styled from 'styled-components';
+import { Button } from './Button';
+import { Input } from './Input';
+import { Textarea } from './Textarea';
 import sectionsRepository, {
   UpdateCardPayload,
-} from "../api/sectionsRepository";
-import { useForm } from "../hooks/useForm";
-import { Card } from "../model/model";
-import boardsRepository from "../api/boardsRepository";
-import { ViewContext } from "../context/viewContext";
-import { ButtonPair } from "./ButtonPair";
-import { DataContext } from "../context/dataContext";
-import { TagInput } from "./TagInput";
-import { DatetimePicker } from "./DatetimePicker";
+} from '../api/sectionsRepository';
+import { useForm } from '../hooks/useForm';
+import { Card } from '../model/model';
+import boardsRepository from '../api/boardsRepository';
+import { ViewContext } from '../context/viewContext';
+import { ButtonPair } from './ButtonPair';
+import { DataContext } from '../context/dataContext';
+import { TagInput } from './TagInput';
+import { DatetimePicker } from './DatetimePicker';
+import { useDropzone } from 'react-dropzone';
+import { ImageUploader } from './ImageUploader';
 
 interface Props {
   item: Card;
@@ -36,18 +38,41 @@ export const EditCardForm = (props: Props) => {
     handleOnSubmit,
     onChangeLabel,
     onChangeLimitDate,
+    onChangeImage,
   } = useForm<UpdateCardPayload>(
     {
       name: item.name,
       description: item.description,
       labels: item.labels!.map((v) => v.name),
       limitTime: item.limitTime,
+      image: item.image,
     },
-    updateCard
+    updateCard,
   );
   const onClickWrapper = (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
   };
+  const getFileAsDataURL = (file: Blob): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        console.log(reader.result);
+        if (typeof reader.result === 'string') {
+          resolve(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const onDrop = useCallback((acceptedFiles) => {
+    acceptedFiles.forEach(async (file: File) => {
+      const image = await getFileAsDataURL(file);
+      onChangeImage(image);
+    });
+  }, []);
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+
   return (
     <Wrapper onClick={onClickWrapper}>
       <Form onSubmit={handleOnSubmit}>
@@ -83,6 +108,12 @@ export const EditCardForm = (props: Props) => {
             placeholder="description"
             onChange={handleOnChangeInput}
           />
+        </Field>
+        <Field>
+          <ImageUploader
+            image={formValue.image ? formValue.image : ''}
+            onChange={onChangeImage}
+          ></ImageUploader>
         </Field>
         <Field>
           <ButtonPair

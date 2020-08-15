@@ -17,6 +17,7 @@
     "react-dnd": "^9.4.0",
     "react-dnd-html5-backend": "^9.4.0",
     "react-dom": "^16.9.0",
+    "react-dropzone": "^11.0.3",
     "react-scripts": "^3.4.1",
     "react-transition-group": "^4.3.0",
     "styled-components": "^5.1.1",

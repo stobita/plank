@@ -1,9 +1,9 @@
-import repository from "./repository";
-import { Card } from "../model/model";
+import repository from './repository';
+import { Card } from '../model/model';
 
-const resource = "/sections";
+const resource = '/sections';
 const childResouce = {
-  cards: "cards",
+  cards: 'cards',
 };
 
 export type CreateCardPayload = {
@@ -11,6 +11,7 @@ export type CreateCardPayload = {
   description: string;
   labels: string[];
   limitTime?: number;
+  image?: string;
 };
 
 export type MoveCardPayload = {
@@ -23,50 +24,50 @@ export type UpdateCardPayload = CreateCardPayload;
 export default {
   async createCard(
     sectionId: number,
-    payload: CreateCardPayload
+    payload: CreateCardPayload,
   ): Promise<Card> {
     const res = await repository.post<Card>(
       `${resource}/${sectionId}/${childResouce.cards}`,
-      payload
+      payload,
     );
     return res.data;
   },
   async updateCard(
     sectionId: number,
     cardId: number,
-    payload: UpdateCardPayload
+    payload: UpdateCardPayload,
   ): Promise<Card> {
     const res = await repository.put(
       `${resource}/${sectionId}/${childResouce.cards}/${cardId}`,
-      payload
+      payload,
     );
     return res.data;
   },
   async deleteCard(sectionId: number, cardId: number): Promise<void> {
     await repository.delete(
-      `${resource}/${sectionId}/${childResouce.cards}/${cardId}`
+      `${resource}/${sectionId}/${childResouce.cards}/${cardId}`,
     );
     return;
   },
   async reorderCardPosition(
     sectionId: number,
     cardId: number,
-    position: number
+    position: number,
   ): Promise<void> {
     await repository.put(
       `${resource}/${sectionId}/${childResouce.cards}/${cardId}/reorder`,
-      { position }
+      { position },
     );
   },
   async moveCard(
     sectionId: number,
     cardId: number,
     position: number,
-    destinationSectionId: number
+    destinationSectionId: number,
   ): Promise<void> {
     await repository.put(
       `${resource}/${sectionId}/${childResouce.cards}/${cardId}/move`,
-      { position, destinationSectionId }
+      { position, destinationSectionId },
     );
   },
 };
