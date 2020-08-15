@@ -39,9 +39,9 @@ export const CreateCardForm = (props: Props) => {
     initializeFormValue,
     onChangeLabel,
     onChangeLimitDate,
-    onChangeImage,
+    onChangeImages,
   } = useForm<CreateCardPayload>(
-    { name: '', description: '', labels: [], image: '' },
+    { name: '', description: '', labels: [], images: [] },
     createCard,
   );
   return (
@@ -82,8 +82,8 @@ export const CreateCardForm = (props: Props) => {
         </Field>
         <Field>
           <ImageUploader
-            image={formValue.image ? formValue.image : ''}
-            onChange={onChangeImage}
+            images={formValue.images ? formValue.images : []}
+            onChange={onChangeImages}
           ></ImageUploader>
         </Field>
         <Field>

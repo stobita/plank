@@ -38,14 +38,14 @@ export const EditCardForm = (props: Props) => {
     handleOnSubmit,
     onChangeLabel,
     onChangeLimitDate,
-    onChangeImage,
+    onChangeImages,
   } = useForm<UpdateCardPayload>(
     {
       name: item.name,
       description: item.description,
       labels: item.labels!.map((v) => v.name),
       limitTime: item.limitTime,
-      image: item.image,
+      images: item.images,
     },
     updateCard,
   );
@@ -64,14 +64,6 @@ export const EditCardForm = (props: Props) => {
       reader.readAsDataURL(file);
     });
   };
-
-  const onDrop = useCallback((acceptedFiles) => {
-    acceptedFiles.forEach(async (file: File) => {
-      const image = await getFileAsDataURL(file);
-      onChangeImage(image);
-    });
-  }, []);
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   return (
     <Wrapper onClick={onClickWrapper}>
@@ -111,8 +103,8 @@ export const EditCardForm = (props: Props) => {
         </Field>
         <Field>
           <ImageUploader
-            image={formValue.image ? formValue.image : ''}
-            onChange={onChangeImage}
+            images={formValue.images ? formValue.images : []}
+            onChange={onChangeImages}
           ></ImageUploader>
         </Field>
         <Field>
