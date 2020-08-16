@@ -3,16 +3,18 @@ import styled from 'styled-components';
 import { useDropzone } from 'react-dropzone';
 
 type Props = {
-  image: string;
-  onChange: (image: string) => void;
+  images: string[];
+  onChange: (image: string[]) => void;
 };
 
 export const ImageUploader = (props: Props) => {
-  const onDrop = useCallback((acceptedFiles) => {
-    acceptedFiles.forEach(async (file: File) => {
-      const image = await getFileAsDataURL(file);
-      props.onChange(image);
-    });
+  const onDrop = useCallback(async (acceptedFiles) => {
+    const images = await Promise.all<string>(
+      acceptedFiles.map(async (file: File) => {
+        return await getFileAsDataURL(file);
+      }),
+    );
+    props.onChange(images);
   }, []);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
@@ -30,7 +32,9 @@ export const ImageUploader = (props: Props) => {
 
   return (
     <>
-      {props.image && <img src={props.image} />}
+      {props.images.map((v, i) => (
+        <img src={v} key={i}></img>
+      ))}
       <FileUploadArea {...getRootProps()}>
         <input {...getInputProps()} />
         {isDragActive ? (
