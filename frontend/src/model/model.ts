@@ -32,7 +32,7 @@ export type Card = {
   position?: number;
   labels: Label[];
   limitTime?: number;
-  images?: string[];
+  image?: string;
 };
 
 export type Label = {

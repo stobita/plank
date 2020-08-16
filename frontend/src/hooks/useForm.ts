@@ -21,8 +21,8 @@ export const useForm = <P>(initFormValue: P, submitAction: () => void) => {
     setFormValue((prev) => ({ ...prev, limitTime: limitTime }));
   };
 
-  const onChangeImages = (images: string[]) => {
-    setFormValue((prev) => ({ ...prev, images }));
+  const onChangeImage = (image: string) => {
+    setFormValue((prev) => ({ ...prev, image }));
   };
 
   const initializeFormValue = () => {
@@ -35,6 +35,6 @@ export const useForm = <P>(initFormValue: P, submitAction: () => void) => {
     initializeFormValue,
     onChangeLabel,
     onChangeLimitDate,
-    onChangeImages,
+    onChangeImage,
   };
 };
