@@ -26,6 +26,7 @@ services:
       S3_SECRET_KEY: "example_secret_key"
       S3_REGION: "example_region"
       S3_ENDPOINT: "http://minio:9000"
+      S3_ENDPOINT_EXTERNAL: "http://localhost:9000"
   db:
     image: mysql:5.7
     environment:

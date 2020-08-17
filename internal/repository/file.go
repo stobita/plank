@@ -49,6 +49,6 @@ func (r *repository) s3Upload(data io.ReadSeeker, fileName string) (string, erro
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s/%s/"+fileName, os.Getenv("S3_ENDPOINT"), os.Getenv("S3_BUCKET_NAME")), nil
+	return fmt.Sprintf("%s/%s/"+fileName, os.Getenv("S3_ENDPOINT_EXTERNAL"), os.Getenv("S3_BUCKET_NAME")), nil
 
 }

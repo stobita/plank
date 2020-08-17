@@ -1,16 +1,16 @@
-import React, { useState, useContext } from "react";
-import styled from "styled-components";
-import { Card } from "../model/model";
-import { ReactComponent as DeleteIconImage } from "../assets/trash.svg";
-import { ReactComponent as EditIconImage } from "../assets/edit.svg";
-import { ReactComponent as TimeIconImage } from "../assets/time.svg";
-import { DeleteConfirmation } from "./DeleteConfirmation";
-import sectionsRepository from "../api/sectionsRepository";
-import { ViewContext } from "../context/viewContext";
-import boardsRepository from "../api/boardsRepository";
-import { EditCardForm } from "./EditCardForm";
-import { DataContext } from "../context/dataContext";
-import dayjs from "dayjs";
+import React, { useState, useContext } from 'react';
+import styled from 'styled-components';
+import { Card } from '../model/model';
+import { ReactComponent as DeleteIconImage } from '../assets/trash.svg';
+import { ReactComponent as EditIconImage } from '../assets/edit.svg';
+import { ReactComponent as TimeIconImage } from '../assets/time.svg';
+import { DeleteConfirmation } from './DeleteConfirmation';
+import sectionsRepository from '../api/sectionsRepository';
+import { ViewContext } from '../context/viewContext';
+import boardsRepository from '../api/boardsRepository';
+import { EditCardForm } from './EditCardForm';
+import { DataContext } from '../context/dataContext';
+import dayjs from 'dayjs';
 
 interface Props {
   item: Card;
@@ -49,8 +49,8 @@ export const CardPanelDetail = (props: Props) => {
   };
 
   const displayTime = (): string => {
-    if (!item.limitTime) return "";
-    return dayjs.unix(item.limitTime).format("M/DD H:mm");
+    if (!item.limitTime) return '';
+    return dayjs.unix(item.limitTime).format('M/DD H:mm');
   };
 
   return (
@@ -66,7 +66,7 @@ export const CardPanelDetail = (props: Props) => {
           <TopInner>
             <TopInnerTop>
               <Description>
-                {item.description !== "" ? item.description : "no description"}
+                {item.description !== '' ? item.description : 'no description'}
               </Description>
               <Operator>
                 <EditIcon onClick={handleOnClickEdit}></EditIcon>
@@ -88,6 +88,11 @@ export const CardPanelDetail = (props: Props) => {
                 ) : null}
               </TopInnerBottom>
             ) : null}
+            <Images>
+              {item.images &&
+                item.images?.length > 0 &&
+                item.images?.map((v, i) => <img src={v} key={i} />)}
+            </Images>
           </TopInner>
         )}
       </Top>
@@ -187,4 +192,9 @@ const DeleteIcon = styled(DeleteIconImage)`
 const EditIcon = styled(EditIconImage)`
   fill: ${(props) => props.theme.solid};
   height: 24px;
+`;
+
+const Images = styled.div`
+  height: 100%;
+  margin-top: 8px;
 `;
