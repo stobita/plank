@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS cards;
 DROP TABLE IF EXISTS sections;
 DROP TABLE IF EXISTS boards;
 DROP TABLE IF EXISTS labels;
+DROP TABLE IF EXISTS cards_images;
 
 -- TODO: use migration tool
 
@@ -108,3 +109,16 @@ CREATE TABLE cards_labels (
     FOREIGN KEY (label_id)
     REFERENCES labels(id)
 );
+
+CREATE TABLE cards_images (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  card_id INT UNSIGNED NOT NULL,
+  url TEXT NOT NULL,
+  created_at datetime default current_timestamp,
+  updated_at datetime default current_timestamp on update current_timestamp,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_cards_images_card_id
+    FOREIGN KEY (card_id)
+    REFERENCES cards(id)
+);
+

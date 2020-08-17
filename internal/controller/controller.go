@@ -145,6 +145,7 @@ func (c *Controller) PostBoardsSectionsCards() gin.HandlerFunc {
 			SectionID:   uint(sectionID),
 			Labels:      reqBody.Labels,
 			LimitTime:   &limitTime,
+			Images:      reqBody.Images,
 		}
 		result, err := c.inputPort.CreateCard(input)
 		if err != nil {

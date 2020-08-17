@@ -21,6 +21,7 @@ type cardJSON struct {
 	Section     sectionJSON `json:"section"`
 	Labels      []labelJSON `json:"labels"`
 	LimitTime   int64       `json:"limitTime"`
+	Images      []string    `json:"images"`
 }
 
 type labelJSON struct {
@@ -103,6 +104,7 @@ func GetSectionsResponse(model []*model.Section) (listJSON, error) {
 				},
 				Labels:    labels,
 				LimitTime: card.LimitTime.Unix(),
+				Images:    card.Images,
 			})
 		}
 		json.Items = append(json.Items, &sectionJSON{

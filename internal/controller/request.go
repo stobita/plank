@@ -13,6 +13,7 @@ type postBoardsSectionsCardsRequestBody struct {
 	Description string   `json:"description"`
 	Labels      []string `json:"labels"`
 	LimitTime   uint     `json:"limitTime"`
+	Images      []string `json:"images"`
 }
 
 type reorderSectionRequestBody struct {

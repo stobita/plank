@@ -62,6 +62,9 @@ type Repository interface {
 
 	GetBoardLabels(boardID uint) ([]*model.Label, error)
 	GetLabel(id uint) (*model.Label, error)
+
+	SaveCardImage(cardID uint, url string) error
+	UploadCardFile(fileString string) (string, error)
 }
 
 type eventBroker interface {

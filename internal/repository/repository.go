@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/olivere/elastic/v7"
 	"github.com/pkg/errors"
 	"github.com/stobita/plank/internal/model"
@@ -19,18 +20,20 @@ import (
 )
 
 type repository struct {
-	db       *sql.DB
-	esClient *elastic.Client
+	db         *sql.DB
+	esClient   *elastic.Client
+	fileClient *s3.S3
 }
 
 // New ...
-func New(db *sql.DB, esClient *elastic.Client) usecase.Repository {
+func New(db *sql.DB, esClient *elastic.Client, fileClient *s3.S3) usecase.Repository {
 	if os.Getenv("PRODUCTION") != "true" {
 		boil.DebugMode = true
 	}
 	return &repository{
-		db:       db,
-		esClient: esClient,
+		db:         db,
+		esClient:   esClient,
+		fileClient: fileClient,
 	}
 }
 
@@ -134,6 +137,11 @@ func (r *repository) convertSections(rows rdb.SectionSlice) ([]*model.Section, e
 					Name: v.R.Label.Name,
 				}
 			}
+			images := make([]string, len(card.R.CardsImages))
+			log.Printf("image: %v", card.R.CardsImages)
+			for i, v := range card.R.CardsImages {
+				images[i] = v.URL
+			}
 			cards = append(cards, &model.Card{
 				ID:          card.ID,
 				Name:        card.Name,
@@ -141,6 +149,7 @@ func (r *repository) convertSections(rows rdb.SectionSlice) ([]*model.Section, e
 				Position:    card.R.SectionsCardsPosition.Position,
 				Labels:      labels,
 				LimitTime:   &card.LimitTime.Time,
+				Images:      images,
 			})
 		}
 		sort.Slice(cards, func(i, j int) bool {
@@ -179,6 +188,12 @@ func (r *repository) GetBoardSectionsWithCards(board *model.Board) ([]*model.Sec
 				rdb.SectionRels.Cards,
 				rdb.CardRels.CardsLabels,
 				rdb.CardsLabelRels.Label,
+			),
+		),
+		qm.Load(
+			qm.Rels(
+				rdb.SectionRels.Cards,
+				rdb.CardRels.CardsImages,
 			),
 		),
 		qm.Load(rdb.SectionRels.Board),
@@ -237,6 +252,12 @@ func (r *repository) SearchBoardSectionsWithCards(board *model.Board, word strin
 				rdb.SectionRels.Cards,
 				rdb.CardRels.CardsLabels,
 				rdb.CardsLabelRels.Label,
+			),
+		),
+		qm.Load(
+			qm.Rels(
+				rdb.SectionRels.Cards,
+				rdb.CardRels.CardsImages,
 			),
 		),
 		qm.Load(rdb.SectionRels.Board),
@@ -884,6 +905,23 @@ func (r *repository) GetLabelByName(name string) (*model.Label, error) {
 		ID:   label.ID,
 		Name: label.Name,
 	}, nil
+}
+
+func (r *repository) SaveCardImage(cardID uint, url string) error {
+	ctx := context.Background()
+	row, err := rdb.Cards(
+		rdb.CardWhere.ID.EQ(cardID),
+	).One(ctx, r.db)
+	if err != nil {
+		return err
+	}
+	if err := row.AddCardsImages(ctx, r.db, true, &rdb.CardsImage{
+		CardID: cardID,
+		URL:    url,
+	}); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *repository) GetLabel(id uint) (*model.Label, error) {

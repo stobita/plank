@@ -14,6 +14,7 @@ type CreateCardInput struct {
 	SectionID   uint
 	Labels      []string
 	LimitTime   *time.Time
+	Images      []string
 }
 
 type UpdateCardInput struct {
@@ -65,6 +66,17 @@ func (u *usecase) CreateCard(input CreateCardInput) (*model.Card, error) {
 	if err := u.repository.SaveNewCard(m); err != nil {
 		return nil, err
 	}
+
+	for _, v := range input.Images {
+		result, err := u.repository.UploadCardFile(v)
+		if err != nil {
+			return nil, err
+		}
+		if err := u.repository.SaveCardImage(m.ID, result); err != nil {
+			return nil, err
+		}
+	}
+
 	u.eventBroker.PushAddCardEvent(section.Board)
 	return m, nil
 }

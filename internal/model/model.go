@@ -24,6 +24,7 @@ type Card struct {
 	Section     *Section
 	Labels      []*Label
 	LimitTime   *time.Time
+	Images      []string
 }
 
 type Label struct {

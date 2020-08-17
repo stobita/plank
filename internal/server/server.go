@@ -19,7 +19,8 @@ func Run() error {
 	if err != nil {
 		return err
 	}
-	repository := repository.New(db, esClient)
+	fileClient := infrastructure.NewS3Client()
+	repository := repository.New(db, esClient, fileClient)
 	eventBroker := event.NewBroker()
 	usecase := usecase.New(repository, eventBroker)
 	controller := controller.New(usecase)
