@@ -19,8 +19,9 @@ func Run() error {
 	if err != nil {
 		return err
 	}
+	redisClient := infrastructure.NewRedisClient()
 	fileClient := infrastructure.NewS3Client()
-	repository := repository.New(db, esClient, fileClient)
+	repository := repository.New(db, esClient, fileClient, redisClient)
 	eventBroker := event.NewBroker()
 	usecase := usecase.New(repository, eventBroker)
 	controller := controller.New(usecase)
@@ -43,27 +44,30 @@ func getEngine(controller *controller.Controller) (*gin.Engine, error) {
 	}))
 	v1 := r.Group("/api/v1")
 	{
-		v1.GET("/sse", controller.SSESubscribe())
-		v1.GET("/boards", controller.GetBoards())
-		v1.POST("/boards", controller.PostBoards())
-		v1.PUT("/boards/:boardID", controller.PutBoards())
-		v1.DELETE("/boards/:boardID", controller.DeleteBoads())
+		authorized := v1.Group("/")
+		authorized.Use(controller.AuthMiddleware())
+		{
+			authorized.GET("/sse", controller.SSESubscribe())
+			authorized.GET("/boards", controller.GetBoards())
+			authorized.POST("/boards", controller.PostBoards())
+			authorized.PUT("/boards/:boardID", controller.PutBoards())
+			authorized.DELETE("/boards/:boardID", controller.DeleteBoads())
 
-		v1.GET("/boards/:boardID/sections", controller.GetBoardsSections())
-		v1.POST("/boards/:boardID/sections", controller.PostBoardsSections())
-		v1.PUT("/boards/:boardID/sections/:sectionID", controller.PutBoardsSections())
-		v1.DELETE("/boards/:boardID/sections/:sectionID", controller.DeleteBoadsSections())
-		v1.PUT("/boards/:boardID/sections/:sectionID/reorder", controller.ReorderSection())
-		v1.GET("/boards/:boardID/labels/:labelID/sections", controller.GetLabelSections())
+			authorized.GET("/boards/:boardID/sections", controller.GetBoardsSections())
+			authorized.POST("/boards/:boardID/sections", controller.PostBoardsSections())
+			authorized.PUT("/boards/:boardID/sections/:sectionID", controller.PutBoardsSections())
+			authorized.DELETE("/boards/:boardID/sections/:sectionID", controller.DeleteBoadsSections())
+			authorized.PUT("/boards/:boardID/sections/:sectionID/reorder", controller.ReorderSection())
+			authorized.GET("/boards/:boardID/labels/:labelID/sections", controller.GetLabelSections())
 
-		v1.GET("/boards/:boardID/labels", controller.GetBoardLabels())
+			authorized.GET("/boards/:boardID/labels", controller.GetBoardLabels())
 
-		v1.POST("/sections/:sectionID/cards", controller.PostBoardsSectionsCards())
-		v1.PUT("/sections/:sectionID/cards/:cardID", controller.PutBoardsSectionsCards())
-		v1.PUT("/sections/:sectionID/cards/:cardID/reorder", controller.ReorderCard())
-		v1.PUT("/sections/:sectionID/cards/:cardID/move", controller.MoveCard())
-		v1.DELETE("/sections/:sectionID/cards/:cardID", controller.DeleteBoardsSectionsCards())
-
+			authorized.POST("/sections/:sectionID/cards", controller.PostBoardsSectionsCards())
+			authorized.PUT("/sections/:sectionID/cards/:cardID", controller.PutBoardsSectionsCards())
+			authorized.PUT("/sections/:sectionID/cards/:cardID/reorder", controller.ReorderCard())
+			authorized.PUT("/sections/:sectionID/cards/:cardID/move", controller.MoveCard())
+			authorized.DELETE("/sections/:sectionID/cards/:cardID", controller.DeleteBoardsSectionsCards())
+		}
 	}
 	return r, nil
 }

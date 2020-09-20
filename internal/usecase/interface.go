@@ -30,6 +30,8 @@ type InputPort interface {
 	ReorderSectionPosition(id uint, position uint) error
 
 	GetBoardLabels(boardID uint) ([]*model.Label, error)
+
+	GetUserSession(sid string) error
 }
 
 // Repository ...
@@ -65,6 +67,8 @@ type Repository interface {
 
 	SaveCardImage(cardID uint, url string) error
 	UploadCardFile(fileString string) (string, error)
+
+	GetUserSession(sid string) error
 }
 
 type eventBroker interface {

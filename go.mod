@@ -6,6 +6,7 @@ require (
 	github.com/aws/aws-sdk-go v1.33.5
 	github.com/gin-contrib/cors v1.3.0
 	github.com/gin-gonic/gin v1.4.0
+	github.com/go-redis/redis/v8 v8.1.3
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gofrs/uuid v3.2.0+incompatible // indirect
 	github.com/lib/pq v1.2.0
