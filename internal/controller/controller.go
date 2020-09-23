@@ -488,19 +488,19 @@ func (c *Controller) DeleteBoads() gin.HandlerFunc {
 
 func (c *Controller) AuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		sid, err := ctx.Cookie("sid")
-		if err != nil {
-			log.Print(err)
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
-			ctx.Abort()
-			return
-		}
-		if err := c.inputPort.GetUserSession(sid); err != nil {
-			log.Print(err)
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
-			ctx.Abort()
-			return
-		}
-		ctx.Next()
+		// sid, err := ctx.Cookie("sid")
+		// if err != nil {
+		// 	log.Print(err)
+		// 	ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid params"})
+		// 	ctx.Abort()
+		// 	return
+		// }
+		// if err := c.inputPort.GetUserSession(sid); err != nil {
+		// 	log.Print(err)
+		// 	ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+		// 	ctx.Abort()
+		// 	return
+		// }
+		// ctx.Next()
 	}
 }
