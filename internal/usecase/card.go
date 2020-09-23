@@ -28,6 +28,27 @@ type ReorderCardPositionInput struct {
 	TargetSectionID uint
 }
 
+func (u *usecase) saveUnsavedLabels(input []string, boardID uint) ([]*model.Label, error) {
+	labels := make([]*model.Label, len(input))
+	for i, v := range input {
+		label, err := u.repository.GetLabelByName(v)
+		if err != nil && err != sql.ErrNoRows {
+			return nil, err
+		}
+		if label == nil {
+			label = &model.Label{
+				Name:    v,
+				BoardID: boardID,
+			}
+			if err := u.repository.SaveNewLabel(label); err != nil {
+				return nil, err
+			}
+		}
+		labels[i] = label
+	}
+	return labels, nil
+}
+
 func (u *usecase) CreateCard(input CreateCardInput) (*model.Card, error) {
 	section, err := u.repository.GetSection(input.SectionID)
 	if err != nil && err != sql.ErrNoRows {
@@ -37,22 +58,9 @@ func (u *usecase) CreateCard(input CreateCardInput) (*model.Card, error) {
 		return nil, errors.New("Invalid section id")
 	}
 
-	labels := make([]*model.Label, len(input.Labels))
-	for i, v := range input.Labels {
-		label, err := u.repository.GetLabelByName(v)
-		if err != nil && err != sql.ErrNoRows {
-			return nil, err
-		}
-		if label == nil {
-			label = &model.Label{
-				Name:    v,
-				BoardID: section.Board.ID,
-			}
-			if err := u.repository.SaveNewLabel(label); err != nil {
-				return nil, err
-			}
-		}
-		labels[i] = label
+	labels, err := u.saveUnsavedLabels(input.Labels, section.Board.ID)
+	if err != nil {
+		return nil, err
 	}
 
 	m := &model.Card{
@@ -91,22 +99,9 @@ func (u *usecase) UpdateCard(id int, input UpdateCardInput) (*model.Card, error)
 	card.Description = input.Description
 	card.LimitTime = input.LimitTime
 
-	labels := make([]*model.Label, len(input.Labels))
-	for i, v := range input.Labels {
-		label, err := u.repository.GetLabelByName(v)
-		if err != nil && err != sql.ErrNoRows {
-			return nil, err
-		}
-		if label == nil {
-			label = &model.Label{
-				Name:    v,
-				BoardID: card.Section.Board.ID,
-			}
-			if err := u.repository.SaveNewLabel(label); err != nil {
-				return nil, err
-			}
-		}
-		labels[i] = label
+	labels, err := u.saveUnsavedLabels(input.Labels, card.Section.Board.ID)
+	if err != nil {
+		return nil, err
 	}
 	card.Labels = labels
 
