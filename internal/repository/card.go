@@ -252,25 +252,12 @@ func sortCards(position uint, card *rdb.Card, targetSectionID uint, tx *sql.Tx) 
 		return err
 	}
 
-	if _, err := tx.ExecContext(
-		ctx,
-		"UPDATE sections_cards_positions set position = position-1 WHERE section_id = ? AND position > ? ORDER BY position;",
-		card.SectionID,
-		oldPosition.Position,
-	); err != nil {
-		tx.Rollback()
-		return err
+	if err := updateLowerCardPositions(oldPosition.Position, card.SectionID, tx); err != nil {
+		return errors.Wrap(err, "update lower card position error")
 	}
 
-	// higher
-	if _, err := tx.ExecContext(
-		ctx,
-		"UPDATE sections_cards_positions set position = position+1 WHERE section_id = ? AND position >= ? ORDER BY position DESC;",
-		targetSectionID,
-		position,
-	); err != nil {
-		tx.Rollback()
-		return err
+	if err := updateHigherCardPositions(position, targetSectionID, tx); err != nil {
+		return errors.Wrap(err, "update higher card position error")
 	}
 
 	newPosition := rdb.SectionsCardsPosition{
@@ -280,6 +267,34 @@ func sortCards(position uint, card *rdb.Card, targetSectionID uint, tx *sql.Tx) 
 	}
 
 	if err := newPosition.Insert(ctx, tx, boil.Infer()); err != nil {
+		tx.Rollback()
+		return err
+	}
+	return nil
+}
+
+func updateHigherCardPositions(position uint, sectionID uint, tx *sql.Tx) error {
+	ctx := context.Background()
+	if _, err := tx.ExecContext(
+		ctx,
+		"UPDATE sections_cards_positions set position = position+1 WHERE section_id = ? AND position >= ? ORDER BY position DESC;",
+		sectionID,
+		position,
+	); err != nil {
+		tx.Rollback()
+		return err
+	}
+	return nil
+}
+
+func updateLowerCardPositions(oldPosition uint, sectionID uint, tx *sql.Tx) error {
+	ctx := context.Background()
+	if _, err := tx.ExecContext(
+		ctx,
+		"UPDATE sections_cards_positions set position = position-1 WHERE section_id = ? AND position > ? ORDER BY position;",
+		sectionID,
+		oldPosition,
+	); err != nil {
 		tx.Rollback()
 		return err
 	}
