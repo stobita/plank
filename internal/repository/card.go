@@ -359,44 +359,67 @@ func (r *repository) SaveNewCard(m *model.Card) error {
 
 	m.ID = row.ID
 
+	if err := sortForNewCard(row, m.Position, tx); err != nil {
+		return errors.Wrap(err, "sort for new card error")
+	}
+
+	if err := addCardsLabels(row, m.Labels, tx); err != nil {
+		return errors.Wrap(err, "add cards labels error")
+	}
+
+	tx.Commit()
+
+	if err := r.addCardDocument(m); err != nil {
+		return errors.Wrap(err, "add card document error")
+	}
+
+	return nil
+}
+
+func sortForNewCard(row rdb.Card, position uint, tx *sql.Tx) error {
+	ctx := context.Background()
 	if _, err := tx.ExecContext(
 		ctx,
 		"UPDATE sections_cards_positions set position = position+1 WHERE section_id = ? AND position >= ? ORDER BY position DESC;",
 		row.SectionID,
-		m.Position,
+		position,
 	); err != nil {
 		tx.Rollback()
 		return err
 	}
-
-	if err := row.SetSectionsCardsPosition(ctx, tx, true, &rdb.SectionsCardsPosition{SectionID: row.SectionID, Position: m.Position}); err != nil {
+	if err := row.SetSectionsCardsPosition(ctx, tx, true, &rdb.SectionsCardsPosition{SectionID: row.SectionID, Position: position}); err != nil {
 		tx.Rollback()
 		return err
 	}
+	return nil
+}
 
-	rels := make([]*rdb.CardsLabel, len(m.Labels))
-	for i, v := range m.Labels {
+func addCardsLabels(card rdb.Card, labels []*model.Label, tx *sql.Tx) error {
+	ctx := context.Background()
+	rels := make([]*rdb.CardsLabel, len(labels))
+	for i, v := range labels {
 		value := &rdb.CardsLabel{
 			LabelID: v.ID,
 		}
 		rels[i] = value
 	}
-	if err := row.AddCardsLabels(ctx, tx, true, rels...); err != nil {
+	if err := card.AddCardsLabels(ctx, tx, true, rels...); err != nil {
 		tx.Rollback()
 		return errors.Wrap(err, "link.AddLinksTags error")
 	}
+	return nil
+}
 
-	tx.Commit()
-
+func (r *repository) addCardDocument(m *model.Card) error {
+	ctx := context.Background()
 	doc := cardDocument{
 		Name:        m.Name,
 		Description: m.Description,
 	}
-	_, err = r.esClient.Index().Index(cardIndex).
+	_, err := r.esClient.Index().Index(cardIndex).
 		Id(strconv.Itoa(int(m.ID))).BodyJson(doc).Do(ctx)
 	if err != nil {
 		return errors.Wrap(err, "create document error")
 	}
-
 	return nil
 }
