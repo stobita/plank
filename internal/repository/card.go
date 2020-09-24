@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"strconv"
 
@@ -78,57 +79,8 @@ func (r *repository) SaveCard(m *model.Card) error {
 		return err
 	}
 
-	beforeLabels := make([]string, len(row.R.CardsLabels))
-	for i, v := range row.R.CardsLabels {
-		beforeLabels[i] = v.R.Label.Name
-	}
-	log.Println("beforeLabels: ", beforeLabels)
-	afterLabels := make([]string, len(m.Labels))
-	for i, v := range m.Labels {
-		afterLabels[i] = v.Name
-	}
-	log.Println("afterLabels: ", afterLabels)
-
-	labelDiff := stringArrayDiff(beforeLabels, afterLabels)
-
-	addLabelIDs := []interface{}{}
-	for _, v := range labelDiff.Inc {
-		for _, vv := range m.Labels {
-			if v == vv.Name {
-				addLabelIDs = append(addLabelIDs, vv.ID)
-			}
-		}
-	}
-	log.Println("addLabelIDs: ", addLabelIDs)
-	removeLabelIDs := []interface{}{}
-	for _, v := range labelDiff.Dec {
-		for _, vv := range row.R.CardsLabels {
-			if v == vv.R.Label.Name {
-				removeLabelIDs = append(removeLabelIDs, vv.R.Label.ID)
-			}
-		}
-	}
-	log.Println("removeLabelIDs: ", removeLabelIDs)
-
-	if len(addLabelIDs) > 0 {
-		rels := []*rdb.CardsLabel{}
-		for _, v := range addLabelIDs {
-			i := &rdb.CardsLabel{
-				LabelID: v.(uint),
-			}
-			rels = append(rels, i)
-		}
-		if err := row.AddCardsLabels(ctx, tx, true, rels...); err != nil {
-			return err
-		}
-	}
-
-	if len(removeLabelIDs) > 0 {
-		if _, err := row.CardsLabels(
-			qm.WhereIn("label_id in ?", removeLabelIDs...),
-		).DeleteAll(ctx, tx); err != nil {
-			return err
-		}
+	if err := updateCardLabels(row, row.R.CardsLabels, m.Labels, tx); err != nil {
+		return errors.Wrap(err, "update card labels error")
 	}
 
 	tx.Commit()
@@ -146,6 +98,61 @@ func (r *repository) SaveCard(m *model.Card) error {
 		return errors.Wrap(err, "update document error")
 	}
 
+	return nil
+}
+
+func updateCardLabels(card *rdb.Card, savedLabels rdb.CardsLabelSlice, inputLabels []*model.Label, tx *sql.Tx) error {
+	beforeLabels := make([]string, len(savedLabels))
+	for i, v := range savedLabels {
+		beforeLabels[i] = v.R.Label.Name
+	}
+	afterLabels := make([]string, len(inputLabels))
+	for i, v := range inputLabels {
+		afterLabels[i] = v.Name
+	}
+
+	labelDiff := stringArrayDiff(beforeLabels, afterLabels)
+
+	addLabelIDs := []interface{}{}
+	for _, v := range labelDiff.Inc {
+		for _, vv := range inputLabels {
+			if v == vv.Name {
+				addLabelIDs = append(addLabelIDs, vv.ID)
+			}
+		}
+	}
+
+	removeLabelIDs := []interface{}{}
+	for _, v := range labelDiff.Dec {
+		for _, vv := range savedLabels {
+			if v == vv.R.Label.Name {
+				removeLabelIDs = append(removeLabelIDs, vv.R.Label.ID)
+			}
+		}
+	}
+
+	ctx := context.Background()
+
+	if len(addLabelIDs) > 0 {
+		rels := []*rdb.CardsLabel{}
+		for _, v := range addLabelIDs {
+			i := &rdb.CardsLabel{
+				LabelID: v.(uint),
+			}
+			rels = append(rels, i)
+		}
+		if err := card.AddCardsLabels(ctx, tx, true, rels...); err != nil {
+			return err
+		}
+	}
+
+	if len(removeLabelIDs) > 0 {
+		if _, err := card.CardsLabels(
+			qm.WhereIn("label_id in ?", removeLabelIDs...),
+		).DeleteAll(ctx, tx); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

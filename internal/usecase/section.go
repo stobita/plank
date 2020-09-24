@@ -66,29 +66,41 @@ func (u *usecase) GetLabelSections(boardID uint, labelID uint) ([]*model.Section
 		return nil, err
 	}
 
+	return u.filterSectionsByLabel(label, sections)
+}
+
+func (u *usecase) checkHasLabel(label *model.Label, labels []*model.Label) bool {
+	hasLabel := false
+	for _, _label := range labels {
+		if _label.ID == label.ID {
+			hasLabel = true
+		}
+	}
+	return hasLabel
+
+}
+
+func (u *usecase) filterCardsByLabel(label *model.Label, c []*model.Card) []*model.Card {
+	cards := []*model.Card{}
+	for _, card := range c {
+		if u.checkHasLabel(label, card.Labels) {
+			c := new(model.Card)
+			c = card
+			cards = append(cards, c)
+		}
+	}
+	return cards
+}
+
+func (u *usecase) filterSectionsByLabel(label *model.Label, sections []*model.Section) ([]*model.Section, error) {
 	result := make([]*model.Section, len(sections))
 	for i, section := range sections {
-		cards := []*model.Card{}
-		for _, card := range section.Cards {
-			hasLabel := false
-			for _, _label := range card.Labels {
-				if _label.ID == label.ID {
-					hasLabel = true
-				}
-			}
-			if hasLabel {
-				c := new(model.Card)
-				c = card
-				cards = append(cards, c)
-			}
-		}
 		s := new(model.Section)
 		s = section
-		s.Cards = cards
+		s.Cards = u.filterCardsByLabel(label, section.Cards)
 		result[i] = s
 	}
-
-	return sections, nil
+	return result, nil
 }
 
 func (u *usecase) CreateSection(input CreateSectionInput) (*model.Section, error) {
