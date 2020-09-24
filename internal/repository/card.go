@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"log"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -47,6 +46,7 @@ func (r *repository) GetCard(id uint) (*model.Card, error) {
 		},
 	}, nil
 }
+
 func (r *repository) SaveCard(m *model.Card) error {
 	ctx := context.Background()
 	tx, err := r.db.BeginTx(ctx, nil)
@@ -85,19 +85,27 @@ func (r *repository) SaveCard(m *model.Card) error {
 
 	tx.Commit()
 
-	doc := cardDocument{
-		Name:        m.Name,
-		Description: m.Description,
+	if err := r.saveCardDocument(m); err != nil {
+		return errors.Wrap(err, "save card document error")
 	}
-	_, err = r.esClient.Update().
+
+	return nil
+}
+
+func (r *repository) saveCardDocument(card *model.Card) error {
+	ctx := context.Background()
+	doc := cardDocument{
+		Name:        card.Name,
+		Description: card.Description,
+	}
+	_, err := r.esClient.Update().
 		Index(cardIndex).
-		Id(strconv.Itoa(int(m.ID))).
+		Id(strconv.Itoa(int(card.ID))).
 		Doc(doc).
 		Do(ctx)
 	if err != nil {
 		return errors.Wrap(err, "update document error")
 	}
-
 	return nil
 }
 
@@ -172,52 +180,8 @@ func (r *repository) MoveCardPosition(id uint, position uint, newSectionID uint)
 		return err
 	}
 
-	oldPosition, err := rdb.SectionsCardsPositions(
-		rdb.SectionsCardsPositionWhere.CardID.EQ(id),
-		rdb.SectionsCardsPositionWhere.SectionID.EQ(card.SectionID),
-	).One(ctx, tx)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	if _, err := oldPosition.Delete(ctx, tx); err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	if _, err := tx.ExecContext(
-		ctx,
-		"UPDATE sections_cards_positions set position = position-1 WHERE section_id = ? AND position > ? ORDER BY position;",
-		card.SectionID,
-		oldPosition.Position,
-	); err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// higher
-	if _, err := tx.ExecContext(
-		ctx,
-		"UPDATE sections_cards_positions set position = position+1 WHERE section_id = ? AND position >= ? ORDER BY position DESC;",
-		newSectionID,
-		position,
-	); err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	newPosition := rdb.SectionsCardsPosition{
-		CardID:    card.ID,
-		SectionID: newSectionID,
-		Position:  position,
-	}
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	if err := newPosition.Insert(ctx, tx, boil.Infer()); err != nil {
-		tx.Rollback()
-		return err
+	if err := sortCards(position, card, newSectionID, tx); err != nil {
+		return errors.Wrap(err, "sort card error")
 	}
 
 	card.SectionID = newSectionID
@@ -263,18 +227,30 @@ func (r *repository) ReorderCardPosition(id uint, position uint) error {
 		return err
 	}
 
+	if err := sortCards(position, card, card.SectionID, tx); err != nil {
+		return errors.Wrap(err, "sort cards error")
+	}
+
+	tx.Commit()
+	return nil
+}
+
+func sortCards(position uint, card *rdb.Card, targetSectionID uint, tx *sql.Tx) error {
+	ctx := context.Background()
 	// delete
 	oldPosition, err := rdb.SectionsCardsPositions(
 		rdb.SectionsCardsPositionWhere.CardID.EQ(card.ID),
 		rdb.SectionsCardsPositionWhere.SectionID.EQ(card.SectionID),
 	).One(ctx, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 
 	if _, err := oldPosition.Delete(ctx, tx); err != nil {
 		tx.Rollback()
 		return err
 	}
-
-	log.Printf("oldPosition.Position: %v", oldPosition.Position)
 
 	if _, err := tx.ExecContext(
 		ctx,
@@ -286,13 +262,11 @@ func (r *repository) ReorderCardPosition(id uint, position uint) error {
 		return err
 	}
 
-	log.Println("add position")
-
 	// higher
 	if _, err := tx.ExecContext(
 		ctx,
 		"UPDATE sections_cards_positions set position = position+1 WHERE section_id = ? AND position >= ? ORDER BY position DESC;",
-		card.SectionID,
+		targetSectionID,
 		position,
 	); err != nil {
 		tx.Rollback()
@@ -301,14 +275,14 @@ func (r *repository) ReorderCardPosition(id uint, position uint) error {
 
 	newPosition := rdb.SectionsCardsPosition{
 		CardID:    card.ID,
-		SectionID: card.SectionID,
+		SectionID: targetSectionID,
 		Position:  position,
 	}
+
 	if err := newPosition.Insert(ctx, tx, boil.Infer()); err != nil {
 		tx.Rollback()
 		return err
 	}
-	tx.Commit()
 	return nil
 }
 
