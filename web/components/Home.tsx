@@ -1,19 +1,17 @@
-'use client'
-
 import React, { useContext, useEffect } from 'react';
 import styled from 'styled-components';
-import { Header } from '../components/Header';
-import { Sidebar } from '../components/Sidebar';
-import { CreateBoardForm } from '../components/CreateBoardForm';
+import { Header } from './Header';
+import { Sidebar } from './Sidebar';
+import { CreateBoardForm } from './CreateBoardForm';
 import { ViewContext } from '../context/viewContext';
 import { DataContext } from '../context/dataContext';
-import { BoardView } from '../components/BoardView';
+import { BoardView } from './BoardView';
 import { EventContext } from '../context/eventContext';
-import { BoardSetting } from '../components/BoardSetting';
-import { HomeInterrupt } from '../components/HomeInterrupt';
-import { SectionFilter } from '../components/SectionFilter';
+import { BoardSetting } from './BoardSetting';
+import { HomeInterrupt } from './HomeInterrupt';
+import { SectionFilter } from './SectionFilter';
 
-export default function Home() {
+export const Home = () => {
   const {
     createBoardActive,
     setCreateBoardActive,
@@ -69,8 +67,7 @@ export default function Home() {
       </Body>
     </Wrapper>
   );
-}
-
+};
 
 const Wrapper = styled.div`
   display: flex;
