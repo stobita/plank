@@ -1,9 +1,9 @@
-FROM golang:1.13.0-alpine3.10
+FROM golang:1.23.0-alpine3.20
 WORKDIR /plank
 COPY . /plank
 RUN apk add --update --no-cache \
       git && \
-      go get github.com/cortesi/modd/cmd/modd && \
-      go get -u -t github.com/volatiletech/sqlboiler && \
-      go get github.com/volatiletech/sqlboiler/drivers/sqlboiler-mysql
+      go install github.com/cortesi/modd/cmd/modd@latest && \
+      go install github.com/volatiletech/sqlboiler@latest && \
+      go install github.com/volatiletech/sqlboiler/drivers/sqlboiler-mysql@latest
 CMD ["modd", "-f", "configs/modd.conf"]
