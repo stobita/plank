@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect, useState } from "react";
 import { ViewContext } from "../context/viewContext";
-import { localStorageRepository } from "../localStorageRepository";
+import { localStorageRepository } from "../app/localStorageRepository";
 import theme, { ThemeType } from "../theme";
 import { ThemeProvider } from "styled-components";
 import { GlobalStyleWrapper } from "./GlobalStyleWrapper";
