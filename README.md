@@ -1,3 +1,6 @@
+![plank-light](https://github.com/user-attachments/assets/7f0415c1-279b-46de-97fb-aac89fc44bc2)
+![plank-dark](https://github.com/user-attachments/assets/46810837-a3cf-468b-846e-4c078d233dc3)
+
 # Plank - Minimal and Functional Task Management App
 
 Plank is a minimalistic task management app designed to help you stay organized and focused. With a clean interface and essential features, Plank offers a simple yet effective way to manage your daily tasks.
