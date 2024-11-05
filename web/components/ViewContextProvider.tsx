@@ -11,13 +11,17 @@ interface Props {
 }
 
 export const ViewContextProvider = (props: Props) => {
-  const currentThemeName = localStorageRepository.getThemeName();
+  let currentThemeName = "light" as ThemeType;
   const [themeName, setThemeName] = useState<ThemeType>(currentThemeName);
   const [currentBoard, setCurrentBoard] = useState<Board>({ id: 0, name: "" });
   const [createBoardActive, setCreateBoardActive] = useState(false);
   const [boardSettingActive, setBoardSettingActive] = useState(false);
   const [createSectionActive, setCreateSectionActive] = useState(false);
   const [sectionFilterActive, setSectionFilterActive] = useState(false);
+
+  useEffect(() => {
+    currentThemeName = localStorageRepository.getThemeName();
+  }, [])
 
   useEffect(() => {
     localStorageRepository.setThemeName(themeName);
@@ -41,26 +45,28 @@ export const ViewContextProvider = (props: Props) => {
   }, [boardSettingActive, createBoardActive]);
 
   return (
-    <ThemeProvider theme={theme[themeName]}>
-      <ViewContext.Provider
-        value={{
-          themeName,
-          setThemeName,
-          currentBoard,
-          setCurrentBoard,
-          createBoardActive,
-          setCreateBoardActive,
-          boardSettingActive,
-          setBoardSettingActive,
-          createSectionActive,
-          setCreateSectionActive,
-          sectionFilterActive,
-          setSectionFilterActive,
-        }}
+    <ThemeProvider theme= { theme[themeName]} >
+    <ViewContext.Provider
+        value={
+    {
+      themeName,
+        setThemeName,
+        currentBoard,
+        setCurrentBoard,
+        createBoardActive,
+        setCreateBoardActive,
+        boardSettingActive,
+        setBoardSettingActive,
+        createSectionActive,
+        setCreateSectionActive,
+        sectionFilterActive,
+        setSectionFilterActive,
+        }
+  }
       >
-        <GlobalStyleWrapper />
-        {props.children}
-      </ViewContext.Provider>
+    <GlobalStyleWrapper />
+  { props.children }
+  </ViewContext.Provider>
     </ThemeProvider>
   );
 };
